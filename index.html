@@ -47,7 +47,7 @@
             justify-content: flex-start;
             width: 100%;
             min-height: 100vh;
-            padding: max(3rem, env(safe-area-inset-top)) max(3rem, env(safe-area-inset-right)) 0 max(3rem, env(safe-area-inset-left));
+            padding: max(3rem, env(safe-area-inset-top)) max(3rem, env(safe-area-inset-right)) max(2rem, env(safe-area-inset-bottom)) max(3rem, env(safe-area-inset-left));
             overflow-y: auto;
             padding-top: max(4rem, env(safe-area-inset-top) + 2rem);
         }
@@ -64,7 +64,7 @@
             justify-content: flex-start;
             width: 100%;
             min-height: 100vh;
-            padding: max(3rem, env(safe-area-inset-top)) max(3rem, env(safe-area-inset-right)) 0 max(3rem, env(safe-area-inset-left));
+            padding: max(3rem, env(safe-area-inset-top)) max(3rem, env(safe-area-inset-right)) max(2rem, env(safe-area-inset-bottom)) max(3rem, env(safe-area-inset-left));
             overflow-y: auto;
             padding-top: max(4rem, env(safe-area-inset-top) + 2rem);
         }
@@ -894,16 +894,6 @@
                 seconds: [0, 100, 60, 50, 40, 30, 20, 12, 20, 30, 40, 50, 60],
                 minutes: [120, 100, 60, 50, 40, 30, 20, 12, 20, 30, 40, 50, 60],
                 hours: [240, 100, 60, 50, 40, 30, 20, 12, 20, 30, 40, 50, 60]
-            },
-            radar: {
-                seconds: [120, 100, 50],
-                minutes: [180, 100, 50],
-                hours: [200, 100, 50]
-            },
-            fill: {
-                seconds: [[0, 100, 30], [240, 100, 30]],
-                minutes: [[120, 100, 28], [60, 100, 32]],
-                hours: [[0, 100, 30], [240, 100, 30]]
             }
         };
 
@@ -925,53 +915,7 @@
             )`;
         }
 
-        function generateRadar(angle, colorData) {
-            const [hue, sat, lightness] = colorData;
-            return `conic-gradient(
-                from ${angle}deg,
-                hsl(${hue}, ${sat}%, ${lightness}%) 0deg,
-                transparent 2deg,
-                transparent 300deg,
-                hsl(${hue}, ${sat - 30}%, ${lightness * 0.08}%) 315deg,
-                hsl(${hue}, ${sat - 20}%, ${lightness * 0.15}%) 330deg,
-                hsl(${hue}, ${sat}%, ${lightness * 0.25}%) 340deg,
-                hsl(${hue}, ${sat}%, ${lightness * 0.4}%) 350deg,
-                hsl(${hue}, ${sat}%, ${lightness * 0.6}%) 355deg,
-                hsl(${hue}, ${sat}%, ${lightness * 0.8}%) 358deg,
-                hsl(${hue}, ${sat}%, ${lightness}%) 360deg
-            )`;
-        }
 
-        function generateFill(angle, colorData, isSecondCycle = false) {
-            const [startColor, fillColor] = colorData;
-            const [startHue, startSat, startLight] = startColor;
-            const [fillHue, fillSat, fillLight] = fillColor;
-            
-            let baseHue, baseSat, baseLight, growHue, growSat, growLight;
-            if (isSecondCycle) {
-                baseHue = fillHue;
-                baseSat = fillSat;
-                baseLight = fillLight;
-                growHue = startHue;
-                growSat = startSat;
-                growLight = startLight;
-            } else {
-                baseHue = startHue;
-                baseSat = startSat;
-                baseLight = startLight;
-                growHue = fillHue;
-                growSat = fillSat;
-                growLight = fillLight;
-            }
-            
-            return `conic-gradient(
-                from 0deg,
-                hsl(${growHue}, ${growSat}%, ${growLight}%) 0deg,
-                hsl(${growHue}, ${growSat}%, ${growLight}%) ${angle}deg,
-                hsl(${baseHue}, ${baseSat}%, ${baseLight}%) ${angle}deg,
-                hsl(${baseHue}, ${baseSat}%, ${baseLight}%) 360deg
-            )`;
-        }
 
         function renderTexture(textureType, containerSelector = '.clock-container') {
             const container = document.querySelector(containerSelector);
@@ -987,7 +931,7 @@
             // For main clock: seconds ring is 100% of clock (50% radius), position just inside at 47%
             const radius = isPreviewCard ? clockSize * 0.42 : clockSize * 0.47;
             const markerFontSize = isPreviewCard ? clockSize * 0.035 : clockSize * 0.04;
-            const dotSize = isPreviewCard ? clockSize * 0.013 : clockSize * 0.013;
+            const dotSize = clockSize * 0.013;
 
             let positions = [];
             if (textureType === 'cardinal') {
@@ -1092,32 +1036,18 @@
             }
 
             // Only animate if enabled
-            const secondsAngle = clockAnimationEnabled ? ((seconds + milliseconds / 1000) / 60) * 360 : 0;
-            const minutesAngle = clockAnimationEnabled ? ((minutes + seconds / 60) / 60) * 360 : 90;
-            const hoursAngle = clockAnimationEnabled ? ((hours + minutes / 60 + seconds / 3600) / 12) * 360 : 180;
+            const secondsAngle = ((seconds + milliseconds / 1000) / 60) * 360;
+            const minutesAngle = ((minutes + seconds / 60) / 60) * 360;
+            const hoursAngle = ((hours + minutes / 60 + seconds / 3600) / 12) * 360;
 
             const theme = themes[currentTheme];
             const secondsRing = document.querySelector('.seconds-ring');
             const minutesRing = document.querySelector('.minutes-ring');
             const hoursRing = document.querySelector('.hours-ring');
 
-            if (currentTheme === 'radar') {
-                secondsRing.style.background = generateRadar(secondsAngle, theme.seconds);
-                minutesRing.style.background = generateRadar(minutesAngle, theme.minutes);
-                hoursRing.style.background = generateRadar(hoursAngle, theme.hours);
-            } else if (currentTheme === 'fill') {
-                const isSecondMinute = minutes % 2 === 1;
-                const isSecondHour = now.getHours() % 2 === 1;
-                const isSecondHalfDay = now.getHours() >= 12;
-                
-                secondsRing.style.background = generateFill(secondsAngle, theme.seconds, isSecondMinute);
-                minutesRing.style.background = generateFill(minutesAngle, theme.minutes, isSecondHour);
-                hoursRing.style.background = generateFill(hoursAngle, theme.hours, isSecondHalfDay);
-            } else {
-                secondsRing.style.background = generateGradient(secondsAngle, theme.seconds);
-                minutesRing.style.background = generateGradient(minutesAngle, theme.minutes);
-                hoursRing.style.background = generateGradient(hoursAngle, theme.hours);
-            }
+            secondsRing.style.background = generateGradient(secondsAngle, theme.seconds);
+            minutesRing.style.background = generateGradient(minutesAngle, theme.minutes);
+            hoursRing.style.background = generateGradient(hoursAngle, theme.hours);
         }
 
         // Global variables
@@ -1125,10 +1055,8 @@
         let currentTheme = 'metallic';
         let currentTexture = 'none';
         let currentView = 'landing'; // 'landing', 'texture', or 'clock'
-        let clockAnimationEnabled = false; // Control clock animation
-        let pendingTimeFormat = null;
-        let pendingTexture = 'none';
         let rafId = null;
+        let launchedFromSavedConfig = false;
 
         function clockLoop() {
             updateClock();
@@ -1137,12 +1065,10 @@
 
         function startClock() {
             if (rafId) return;
-            clockAnimationEnabled = true;
             rafId = requestAnimationFrame(clockLoop);
         }
 
         function stopClock() {
-            clockAnimationEnabled = false;
             if (rafId) cancelAnimationFrame(rafId);
             rafId = null;
         }
@@ -1169,15 +1095,6 @@
             numbers: 'Numbers (1-12)',
             cardinal: 'Cardinal (12,3,6,9)',
             mixed: 'Mixed Style'
-        };
-
-        const textureIcons = {
-            none: '○',
-            roman: 'XII',
-            dots: '• • •',
-            numbers: '12',
-            cardinal: '12|3|6|9',
-            mixed: 'XII•3'
         };
 
         // Main 6 textures for texture selection page
@@ -1211,19 +1128,9 @@
                 hoursRing.className = 'theme-card-ring hours';
                 
                 // Apply gradients to each ring with static angle (0 degrees)
-                if (themeId === 'radar') {
-                    secondsRing.style.background = generateRadar(0, theme.seconds);
-                    minutesRing.style.background = generateRadar(90, theme.minutes);
-                    hoursRing.style.background = generateRadar(180, theme.hours);
-                } else if (themeId === 'fill') {
-                    secondsRing.style.background = generateFill(180, theme.seconds, false);
-                    minutesRing.style.background = generateFill(120, theme.minutes, false);
-                    hoursRing.style.background = generateFill(60, theme.hours, false);
-                } else {
-                    secondsRing.style.background = generateGradient(0, theme.seconds);
-                    minutesRing.style.background = generateGradient(90, theme.minutes);
-                    hoursRing.style.background = generateGradient(180, theme.hours);
-                }
+                secondsRing.style.background = generateGradient(0, theme.seconds);
+                minutesRing.style.background = generateGradient(90, theme.minutes);
+                hoursRing.style.background = generateGradient(180, theme.hours);
                 
                 preview.appendChild(secondsRing);
                 preview.appendChild(minutesRing);
@@ -1289,19 +1196,9 @@
                 hoursRing.className = 'theme-card-ring hours';
                 
                 // Apply gradients to each ring with static angles
-                if (currentTheme === 'radar') {
-                    secondsRing.style.background = generateRadar(0, theme.seconds);
-                    minutesRing.style.background = generateRadar(90, theme.minutes);
-                    hoursRing.style.background = generateRadar(180, theme.hours);
-                } else if (currentTheme === 'fill') {
-                    secondsRing.style.background = generateFill(180, theme.seconds, false);
-                    minutesRing.style.background = generateFill(120, theme.minutes, false);
-                    hoursRing.style.background = generateFill(60, theme.hours, false);
-                } else {
-                    secondsRing.style.background = generateGradient(0, theme.seconds);
-                    minutesRing.style.background = generateGradient(90, theme.minutes);
-                    hoursRing.style.background = generateGradient(180, theme.hours);
-                }
+                secondsRing.style.background = generateGradient(0, theme.seconds);
+                minutesRing.style.background = generateGradient(90, theme.minutes);
+                hoursRing.style.background = generateGradient(180, theme.hours);
                 
                 preview.appendChild(secondsRing);
                 preview.appendChild(minutesRing);
@@ -1324,6 +1221,16 @@
                 
                 card.addEventListener('click', () => {
                     currentTexture = textureId;
+                    
+                    // Update highlighting on all texture cards
+                    document.querySelectorAll('#textureCards .theme-card').forEach(c => {
+                        c.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                        c.style.background = 'rgba(255, 255, 255, 0.02)';
+                    });
+                    
+                    card.style.borderColor = 'rgba(255,255,255,0.6)';
+                    card.style.background = 'rgba(255,255,255,0.08)';
+                    
                     showClockView();
                 });
                 
@@ -1343,6 +1250,7 @@
 
         function showTexturePage() {
             document.getElementById('landingPage').classList.add('hidden');
+            document.getElementById('clockView').classList.remove('active');   // safety
             document.getElementById('texturePage').classList.add('active');
             currentView = 'texture';
             initTexturePage();
@@ -1360,50 +1268,25 @@
 
         function backFromClockView() {
             document.getElementById('clockView').classList.remove('active');
+            stopClock();
+
+            if (launchedFromSavedConfig) {
+                launchedFromSavedConfig = false; // reset flag
+                backFromTexturePage();           // sends you to landing + refresh
+                return;
+            }
+
             document.getElementById('texturePage').classList.add('active');
             currentView = 'texture';
-
-            stopClock();
             initTexturePage();
         }
 
         function backFromTexturePage() {
+            document.getElementById('clockView').classList.remove('active');   // safety
             document.getElementById('texturePage').classList.remove('active');
             document.getElementById('landingPage').classList.remove('hidden');
             currentView = 'landing';
-        }
-
-        function initTextureGallery() {
-            const grid = document.getElementById('textureGrid');
-            grid.innerHTML = '';
-            
-            Object.keys(textureNames).forEach(textureId => {
-                const item = document.createElement('div');
-                item.className = 'gallery-item' + (textureId === pendingTexture ? ' selected' : '');
-                
-                const preview = document.createElement('div');
-                preview.className = 'gallery-item-preview';
-                
-                const texture = document.createElement('div');
-                texture.className = 'texture-preview';
-                texture.textContent = textureIcons[textureId];
-                
-                preview.appendChild(texture);
-                
-                const name = document.createElement('div');
-                name.className = 'gallery-item-name';
-                name.textContent = textureNames[textureId];
-                
-                item.appendChild(preview);
-                item.appendChild(name);
-                
-                item.addEventListener('click', () => {
-                    pendingTexture = textureId;
-                    initTextureGallery();
-                });
-                
-                grid.appendChild(item);
-            });
+            initLandingPage(); // refresh highlight
         }
 
         // Event Listeners
@@ -1428,16 +1311,22 @@
         window.addEventListener('resize', function() {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(function() {
-                if (currentTexture !== 'none') {
+                if (currentView === 'clock' && currentTexture !== 'none') {
                     renderTexture(currentTexture);
                 }
             }, 100);
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) stopClock();
+            else if (currentView === 'clock') startClock();
         });
 
         // Initialize app
         const hadSavedConfig = loadConfig();
         initLandingPage();
         if (hadSavedConfig) {
+            launchedFromSavedConfig = true;
             showClockView();      // jump straight in
         }
     </script>
