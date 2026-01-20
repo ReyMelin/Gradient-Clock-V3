@@ -47,10 +47,9 @@
             justify-content: flex-start;
             width: 100%;
             min-height: 100vh;
-            padding: max(3rem, env(safe-area-inset-top)) max(3rem, env(safe-area-inset-right)) max(3rem, env(safe-area-inset-bottom)) max(3rem, env(safe-area-inset-left));
+            padding: max(3rem, env(safe-area-inset-top)) max(3rem, env(safe-area-inset-right)) 0 max(3rem, env(safe-area-inset-left));
             overflow-y: auto;
             padding-top: max(4rem, env(safe-area-inset-top) + 2rem);
-            padding-bottom: max(6rem, env(safe-area-inset-bottom) + 4rem);
         }
 
         .landing-page.hidden {
@@ -65,10 +64,9 @@
             justify-content: flex-start;
             width: 100%;
             min-height: 100vh;
-            padding: max(3rem, env(safe-area-inset-top)) max(3rem, env(safe-area-inset-right)) max(3rem, env(safe-area-inset-bottom)) max(3rem, env(safe-area-inset-left));
+            padding: max(3rem, env(safe-area-inset-top)) max(3rem, env(safe-area-inset-right)) 0 max(3rem, env(safe-area-inset-left));
             overflow-y: auto;
             padding-top: max(4rem, env(safe-area-inset-top) + 2rem);
-            padding-bottom: max(6rem, env(safe-area-inset-bottom) + 4rem);
         }
 
         .texture-page.active {
@@ -177,15 +175,22 @@
         /* Clock View */
         .clock-view {
             display: none;
+            flex-direction: column;
             width: 100%;
-            height: 100vh;
+            min-height: 100vh;
             position: relative;
         }
 
         .clock-view.active {
             display: flex;
+        }
+
+        .clock-view-content {
+            flex: 1;
+            display: flex;
             justify-content: center;
             align-items: center;
+            width: 100%;
         }
 
         .back-button,
@@ -663,20 +668,25 @@
 
         /* Footer Styles */
         .page-footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            width: 100%;
             padding: 1rem 2rem;
+            margin-top: auto;
             background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(10px);
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
             font-size: 0.875rem;
             color: rgba(255, 255, 255, 0.6);
-            z-index: 50;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .footer-left {
@@ -785,10 +795,12 @@
         <p class="landing-subtitle">Select your theme</p>
         <div class="theme-cards" id="themeCards"></div>
         <div class="page-footer">
-            <div class="footer-left">
-                <a href="privacy.html" class="footer-link">Privacy Policy</a>
+            <div class="footer-content">
+                <div class="footer-left">
+                    <a href="privacy.html" class="footer-link">Privacy Policy</a>
+                </div>
+                <div class="footer-creator">Created by Entler Entertainment</div>
             </div>
-            <div class="footer-creator">Created by Entler Entertainment</div>
         </div>
     </div>
 
@@ -799,10 +811,12 @@
         <p class="landing-subtitle">Select your texture</p>
         <div class="theme-cards" id="textureCards"></div>
         <div class="page-footer">
-            <div class="footer-left">
-                <a href="privacy.html" class="footer-link">Privacy Policy</a>
+            <div class="footer-content">
+                <div class="footer-left">
+                    <a href="privacy.html" class="footer-link">Privacy Policy</a>
+                </div>
+                <div class="footer-creator">Created by Entler Entertainment</div>
             </div>
-            <div class="footer-creator">Created by Entler Entertainment</div>
         </div>
     </div>
 
@@ -811,43 +825,21 @@
         <button class="back-button" id="backBtn">← Back</button>
         <button class="save-settings-button" id="saveSettingsBtn">💾 Save my settings</button>
         
-        <div class="clock-container">
-            <div class="ring seconds-ring"></div>
-            <div class="ring minutes-ring"></div>
-            <div class="ring hours-ring"></div>
-            <div class="time-display">00:00:00</div>
+        <div class="clock-view-content">
+            <div class="clock-container">
+                <div class="ring seconds-ring"></div>
+                <div class="ring minutes-ring"></div>
+                <div class="ring hours-ring"></div>
+                <div class="time-display">00:00:00</div>
+            </div>
         </div>
         <div class="page-footer">
-            <div class="footer-left">
-                <a href="privacy.html" class="footer-link">Privacy Policy</a>
+            <div class="footer-content">
+                <div class="footer-left">
+                    <a href="privacy.html" class="footer-link">Privacy Policy</a>
+                </div>
+                <div class="footer-creator">Created by Entler Entertainment</div>
             </div>
-            <div class="footer-creator">Created by Entler Entertainment</div>
-        </div>
-    </div>
-
-    <!-- Options Gallery Modal -->
-    <div class="gallery-modal" id="optionsGallery">
-        <div class="gallery-header">
-            <h2 class="gallery-title">Options</h2>
-            <button class="gallery-close" id="closeOptionsGallery">✕ Close</button>
-        </div>
-
-        <div class="options-section">
-            <h3>Time Format</h3>
-            <div class="options-buttons">
-                <button class="option-btn" id="hideTimeBtn">Hidden</button>
-                <button class="option-btn" id="militaryBtn">24-Hour</button>
-                <button class="option-btn" id="ampmBtn">AM/PM</button>
-            </div>
-        </div>
-
-        <div class="options-section">
-            <h3>Texture</h3>
-            <div class="gallery-grid" id="textureGrid"></div>
-        </div>
-
-        <div class="options-section">
-            <button class="save-button" id="saveOptionsBtn">💾 Save & Apply</button>
         </div>
     </div>
 
@@ -1048,19 +1040,16 @@
         function loadConfig() {
             try {
                 const saved = localStorage.getItem('gradientClockConfig');
-                if (saved) {
-                    const config = JSON.parse(saved);
-                    timeFormat = config.timeFormat || null;
-                    currentTheme = config.theme || 'metallic';
-                    currentTexture = config.texture || 'none';
-                    
-                    // Apply loaded texture
-                    if (currentTexture !== 'none') {
-                        renderTexture(currentTexture);
-                    }
-                }
+                if (!saved) return false;
+
+                const config = JSON.parse(saved);
+                timeFormat = config.timeFormat ?? null;
+                currentTheme = config.theme || 'metallic';
+                currentTexture = config.texture || 'none';
+                return true;
             } catch (e) {
                 console.error('Failed to load config:', e);
+                return false;
             }
         }
 
@@ -1139,9 +1128,27 @@
         let clockAnimationEnabled = false; // Control clock animation
         let pendingTimeFormat = null;
         let pendingTexture = 'none';
+        let rafId = null;
 
+        function clockLoop() {
+            updateClock();
+            rafId = requestAnimationFrame(clockLoop);
+        }
+
+        function startClock() {
+            if (rafId) return;
+            clockAnimationEnabled = true;
+            rafId = requestAnimationFrame(clockLoop);
+        }
+
+        function stopClock() {
+            clockAnimationEnabled = false;
+            if (rafId) cancelAnimationFrame(rafId);
+            rafId = null;
+        }
+
+        // Initial update for any visible clock elements
         updateClock();
-        setInterval(updateClock, 100);
 
         // Main themes for landing page
         const mainThemes = ['metallic', 'space', 'dark', 'flowerpower', 'winter', 'rgb'];
@@ -1326,17 +1333,17 @@
             document.getElementById('texturePage').classList.remove('active');
             document.getElementById('clockView').classList.add('active');
             currentView = 'clock';
-            clockAnimationEnabled = true;
+
             renderTexture(currentTexture);
-            updateClock();
+            startClock();
         }
 
         function backFromClockView() {
             document.getElementById('clockView').classList.remove('active');
             document.getElementById('texturePage').classList.add('active');
             currentView = 'texture';
-            clockAnimationEnabled = false;
-            // Re-initialize texture page to show the current theme
+
+            stopClock();
             initTexturePage();
         }
 
@@ -1379,55 +1386,6 @@
             });
         }
 
-        function openOptions() {
-            // Initialize pending values with current values
-            pendingTimeFormat = timeFormat;
-            pendingTexture = currentTexture;
-            
-            initTextureGallery();
-            updateTimeFormatButtons();
-            document.getElementById('optionsGallery').classList.add('active');
-        }
-
-        function closeOptions() {
-            document.getElementById('optionsGallery').classList.remove('active');
-        }
-
-        function saveOptions() {
-            // Apply pending values
-            timeFormat = pendingTimeFormat;
-            currentTexture = pendingTexture;
-            
-            // Enable clock animation
-            clockAnimationEnabled = true;
-            
-            // Apply texture
-            renderTexture(currentTexture);
-            
-            // Update clock display
-            updateClock();
-            
-            // Save to localStorage
-            saveConfigToStorage();
-            
-            // Close options
-            closeOptions();
-        }
-
-        function updateTimeFormatButtons() {
-            document.getElementById('hideTimeBtn').classList.remove('active');
-            document.getElementById('militaryBtn').classList.remove('active');
-            document.getElementById('ampmBtn').classList.remove('active');
-            
-            if (pendingTimeFormat === null) {
-                document.getElementById('hideTimeBtn').classList.add('active');
-            } else if (pendingTimeFormat === 'military') {
-                document.getElementById('militaryBtn').classList.add('active');
-            } else if (pendingTimeFormat === 'ampm') {
-                document.getElementById('ampmBtn').classList.add('active');
-            }
-        }
-
         // Event Listeners
         document.getElementById('backBtn').addEventListener('click', backFromClockView);
         document.getElementById('backFromTextureBtn').addEventListener('click', backFromTexturePage);
@@ -1445,24 +1403,6 @@
                 btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
             }, 2000);
         });
-        
-        document.getElementById('closeOptionsGallery').addEventListener('click', closeOptions);
-        document.getElementById('saveOptionsBtn').addEventListener('click', saveOptions);
-
-        document.getElementById('hideTimeBtn').addEventListener('click', function() {
-            pendingTimeFormat = null;
-            updateTimeFormatButtons();
-        });
-
-        document.getElementById('militaryBtn').addEventListener('click', function() {
-            pendingTimeFormat = 'military';
-            updateTimeFormatButtons();
-        });
-
-        document.getElementById('ampmBtn').addEventListener('click', function() {
-            pendingTimeFormat = 'ampm';
-            updateTimeFormatButtons();
-        });
 
         let resizeTimeout;
         window.addEventListener('resize', function() {
@@ -1476,7 +1416,10 @@
 
         // Initialize app
         initLandingPage();
-        loadConfig();
+        const hadSavedConfig = loadConfig();
+        if (hadSavedConfig) {
+            showClockView();      // jump straight in
+        }
     </script>
 </body>
 </html>
