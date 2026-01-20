@@ -11,7 +11,7 @@
             --seconds-size: var(--clock-size);
             --minutes-size: calc(var(--clock-size) * 0.833);
             --hours-size: calc(var(--clock-size) * 0.583);
-            --marker-radius: calc(var(--clock-size) * 0.467);
+            --marker-radius: calc(var(--clock-size) * 0.5);
             --font-size: calc(var(--clock-size) * 0.08);
             --marker-font-size: calc(var(--clock-size) * 0.04);
         }
@@ -50,11 +50,35 @@
             padding: max(3rem, env(safe-area-inset-top)) max(3rem, env(safe-area-inset-right)) max(3rem, env(safe-area-inset-bottom)) max(3rem, env(safe-area-inset-left));
             overflow-y: auto;
             padding-top: max(4rem, env(safe-area-inset-top) + 2rem);
-            padding-bottom: max(4rem, env(safe-area-inset-bottom) + 2rem);
+            padding-bottom: max(6rem, env(safe-area-inset-bottom) + 4rem);
         }
 
         .landing-page.hidden {
             display: none;
+        }
+
+        /* Texture Selection Page Styles */
+        .texture-page {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            min-height: 100vh;
+            padding: max(3rem, env(safe-area-inset-top)) max(3rem, env(safe-area-inset-right)) max(3rem, env(safe-area-inset-bottom)) max(3rem, env(safe-area-inset-left));
+            overflow-y: auto;
+            padding-top: max(4rem, env(safe-area-inset-top) + 2rem);
+            padding-bottom: max(6rem, env(safe-area-inset-bottom) + 4rem);
+        }
+
+        .texture-page.active {
+            display: flex;
+        }
+
+        .texture-page .back-button {
+            position: absolute;
+            top: max(2rem, env(safe-area-inset-top));
+            left: max(2rem, env(safe-area-inset-left));
         }
 
         .landing-title {
@@ -85,7 +109,15 @@
             margin-bottom: 2rem;
         }
 
+        .theme-card-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
         .theme-card {
+            width: 100%;
             aspect-ratio: 1;
             border-radius: 20px;
             cursor: pointer;
@@ -114,32 +146,31 @@
         .theme-card-ring {
             position: absolute;
             border-radius: 50%;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
         }
 
         .theme-card-ring.seconds {
-            width: 70%;
-            height: 70%;
+            width: 90%;
+            height: 90%;
         }
 
         .theme-card-ring.minutes {
-            width: 58%;
-            height: 58%;
+            width: 75%;
+            height: 75%;
         }
 
         .theme-card-ring.hours {
-            width: 41%;
-            height: 41%;
+            width: 52.5%;
+            height: 52.5%;
         }
 
         .theme-card-name {
-            position: absolute;
-            bottom: 1.5rem;
-            left: 50%;
-            transform: translateX(-50%);
             font-size: 1.2rem;
             font-weight: 600;
             color: rgba(255, 255, 255, 0.95);
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            text-align: center;
             white-space: nowrap;
         }
 
@@ -158,7 +189,7 @@
         }
 
         .back-button,
-        .options-button {
+        .save-settings-button {
             position: fixed;
             padding: 12px 24px;
             font-size: 16px;
@@ -178,16 +209,24 @@
             left: max(2rem, env(safe-area-inset-left));
         }
 
-        .options-button {
+        .save-settings-button {
             top: max(2rem, env(safe-area-inset-top));
             right: max(2rem, env(safe-area-inset-right));
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.95);
         }
 
         .back-button:hover,
-        .options-button:hover {
+        .save-settings-button:hover {
             background: rgba(255, 255, 255, 0.2);
             border-color: rgba(255, 255, 255, 0.4);
             color: rgba(255, 255, 255, 1);
+        }
+
+        .save-settings-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
         }
 
         .clock-container {
@@ -467,11 +506,10 @@
 
             .theme-card-name {
                 font-size: 1rem;
-                bottom: 1rem;
             }
 
             .back-button,
-            .options-button {
+            .save-settings-button {
                 padding: 10px 18px;
                 font-size: 14px;
             }
@@ -517,7 +555,6 @@
 
             .theme-card-name {
                 font-size: 0.9rem;
-                bottom: 0.75rem;
             }
 
             .gallery-grid {
@@ -583,7 +620,6 @@
 
             .theme-card-name {
                 font-size: 0.85rem;
-                bottom: 0.5rem;
             }
         }
 
@@ -604,8 +640,77 @@
             font-size: 0;
         }
 
+        .theme-card-preview .clock-marker {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.65rem;
+            font-weight: 300;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .theme-card-preview .clock-marker.dot {
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            font-size: 0;
+        }
+
         .info {
             display: none;
+        }
+
+        /* Footer Styles */
+        .page-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem 2rem;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.6);
+            z-index: 50;
+        }
+
+        .footer-left {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .footer-link {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: rgba(255, 255, 255, 1);
+        }
+
+        .footer-creator {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        @media (max-width: 768px) {
+            .page-footer {
+                flex-direction: column;
+                gap: 0.5rem;
+                padding: 1rem;
+                text-align: center;
+            }
+
+            .footer-left {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
         }
 
         /* Responsive breakpoints */
@@ -679,18 +784,44 @@
         <h1 class="landing-title">Gradient Clock</h1>
         <p class="landing-subtitle">Select your theme</p>
         <div class="theme-cards" id="themeCards"></div>
+        <div class="page-footer">
+            <div class="footer-left">
+                <a href="privacy.html" class="footer-link">Privacy Policy</a>
+            </div>
+            <div class="footer-creator">Created by Entler Entertainment</div>
+        </div>
+    </div>
+
+    <!-- Texture Selection Page -->
+    <div class="texture-page" id="texturePage">
+        <button class="back-button" id="backFromTextureBtn">← Back</button>
+        <h1 class="landing-title">Gradient Clock</h1>
+        <p class="landing-subtitle">Select your texture</p>
+        <div class="theme-cards" id="textureCards"></div>
+        <div class="page-footer">
+            <div class="footer-left">
+                <a href="privacy.html" class="footer-link">Privacy Policy</a>
+            </div>
+            <div class="footer-creator">Created by Entler Entertainment</div>
+        </div>
     </div>
 
     <!-- Clock View -->
     <div class="clock-view" id="clockView">
         <button class="back-button" id="backBtn">← Back</button>
-        <button class="options-button" id="optionsBtn">⚙️ Options</button>
+        <button class="save-settings-button" id="saveSettingsBtn">💾 Save my settings</button>
         
         <div class="clock-container">
             <div class="ring seconds-ring"></div>
             <div class="ring minutes-ring"></div>
             <div class="ring hours-ring"></div>
             <div class="time-display">00:00:00</div>
+        </div>
+        <div class="page-footer">
+            <div class="footer-left">
+                <a href="privacy.html" class="footer-link">Privacy Policy</a>
+            </div>
+            <div class="footer-creator">Created by Entler Entertainment</div>
         </div>
     </div>
 
@@ -850,14 +981,21 @@
             )`;
         }
 
-        function renderTexture(textureType) {
-            document.querySelectorAll('.clock-marker').forEach(marker => marker.remove());
+        function renderTexture(textureType, containerSelector = '.clock-container') {
+            const container = document.querySelector(containerSelector);
+            if (!container) return;
+            
+            container.querySelectorAll('.clock-marker').forEach(marker => marker.remove());
 
             if (textureType === 'none') return;
 
-            const container = document.querySelector('.clock-container');
+            const isPreviewCard = containerSelector.includes('theme-card-preview');
             const clockSize = container.offsetWidth;
-            const radius = clockSize * 0.467;
+            // For preview cards: seconds ring is 90% of card (45% radius), position just inside at 42%
+            // For main clock: seconds ring is 100% of clock (50% radius), position just inside at 47%
+            const radius = isPreviewCard ? clockSize * 0.42 : clockSize * 0.47;
+            const markerFontSize = isPreviewCard ? clockSize * 0.035 : clockSize * 0.04;
+            const dotSize = isPreviewCard ? clockSize * 0.013 : clockSize * 0.013;
 
             let positions = [];
             if (textureType === 'cardinal') {
@@ -876,12 +1014,27 @@
                 
                 if (textureType === 'roman') {
                     marker.textContent = romanNumerals[i];
+                    marker.style.fontSize = `${markerFontSize}px`;
                 } else if (textureType === 'dots') {
                     marker.classList.add('dot');
+                    marker.style.width = `${dotSize}px`;
+                    marker.style.height = `${dotSize}px`;
                 } else if (textureType === 'numbers') {
                     marker.textContent = i === 0 ? 12 : i;
+                    marker.style.fontSize = `${markerFontSize}px`;
                 } else if (textureType === 'cardinal') {
                     marker.textContent = i === 0 ? 12 : (i === 3 ? 3 : (i === 6 ? 6 : 9));
+                    marker.style.fontSize = `${markerFontSize}px`;
+                } else if (textureType === 'mixed') {
+                    // Alternating roman numerals and dots
+                    if (i % 2 === 0) {
+                        marker.textContent = romanNumerals[i];
+                        marker.style.fontSize = `${markerFontSize}px`;
+                    } else {
+                        marker.classList.add('dot');
+                        marker.style.width = `${dotSize}px`;
+                        marker.style.height = `${dotSize}px`;
+                    }
                 }
 
                 marker.style.left = `50%`;
@@ -982,7 +1135,7 @@
         let timeFormat = null; // null = hidden, 'military' = 24-hour, 'ampm' = 12-hour with AM/PM
         let currentTheme = 'metallic';
         let currentTexture = 'none';
-        let currentView = 'landing'; // 'landing' or 'clock'
+        let currentView = 'landing'; // 'landing', 'texture', or 'clock'
         let clockAnimationEnabled = false; // Control clock animation
         let pendingTimeFormat = null;
         let pendingTexture = 'none';
@@ -1007,7 +1160,8 @@
             roman: 'Roman Numerals',
             dots: 'Dots',
             numbers: 'Numbers (1-12)',
-            cardinal: 'Cardinal (12,3,6,9)'
+            cardinal: 'Cardinal (12,3,6,9)',
+            mixed: 'Mixed Style'
         };
 
         const textureIcons = {
@@ -1015,8 +1169,12 @@
             roman: 'XII',
             dots: '• • •',
             numbers: '12',
-            cardinal: '12|3|6|9'
+            cardinal: '12|3|6|9',
+            mixed: 'XII•3'
         };
+
+        // Main 6 textures for texture selection page
+        const mainTextures = ['none', 'roman', 'dots', 'numbers', 'cardinal', 'mixed'];
 
         // Initialize landing page theme cards
         function initLandingPage() {
@@ -1024,6 +1182,9 @@
             container.innerHTML = '';
             
             mainThemes.forEach(themeId => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'theme-card-wrapper';
+                
                 const card = document.createElement('div');
                 card.className = 'theme-card';
                 
@@ -1061,31 +1222,126 @@
                 preview.appendChild(minutesRing);
                 preview.appendChild(hoursRing);
                 
+                card.appendChild(preview);
+                
                 const name = document.createElement('div');
                 name.className = 'theme-card-name';
                 name.textContent = themeNames[themeId];
                 
-                card.appendChild(preview);
-                card.appendChild(name);
+                wrapper.appendChild(card);
+                wrapper.appendChild(name);
                 
                 card.addEventListener('click', () => {
                     currentTheme = themeId;
+                    showTexturePage();
+                });
+                
+                container.appendChild(wrapper);
+            });
+        }
+
+        function initTexturePage() {
+            const container = document.getElementById('textureCards');
+            container.innerHTML = '';
+            
+            mainTextures.forEach((textureId, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'theme-card-wrapper';
+                
+                const card = document.createElement('div');
+                card.className = 'theme-card';
+                
+                const preview = document.createElement('div');
+                preview.className = 'theme-card-preview';
+                preview.setAttribute('data-texture-index', index);
+                
+                const theme = themes[currentTheme];
+                
+                // Create three concentric rings
+                const secondsRing = document.createElement('div');
+                secondsRing.className = 'theme-card-ring seconds';
+                
+                const minutesRing = document.createElement('div');
+                minutesRing.className = 'theme-card-ring minutes';
+                
+                const hoursRing = document.createElement('div');
+                hoursRing.className = 'theme-card-ring hours';
+                
+                // Apply gradients to each ring with static angles
+                if (currentTheme === 'radar') {
+                    secondsRing.style.background = generateRadar(0, theme.seconds);
+                    minutesRing.style.background = generateRadar(90, theme.minutes);
+                    hoursRing.style.background = generateRadar(180, theme.hours);
+                } else if (currentTheme === 'fill') {
+                    secondsRing.style.background = generateFill(180, theme.seconds, false);
+                    minutesRing.style.background = generateFill(120, theme.minutes, false);
+                    hoursRing.style.background = generateFill(60, theme.hours, false);
+                } else {
+                    secondsRing.style.background = generateGradient(0, theme.seconds);
+                    minutesRing.style.background = generateGradient(90, theme.minutes);
+                    hoursRing.style.background = generateGradient(180, theme.hours);
+                }
+                
+                preview.appendChild(secondsRing);
+                preview.appendChild(minutesRing);
+                preview.appendChild(hoursRing);
+                
+                card.appendChild(preview);
+                
+                const name = document.createElement('div');
+                name.className = 'theme-card-name';
+                name.textContent = textureNames[textureId];
+                
+                wrapper.appendChild(card);
+                wrapper.appendChild(name);
+                
+                card.addEventListener('click', () => {
+                    currentTexture = textureId;
                     showClockView();
                 });
                 
-                container.appendChild(card);
+                container.appendChild(wrapper);
             });
+            
+            // Render textures on each card after a brief delay to ensure sizing
+            setTimeout(() => {
+                mainTextures.forEach((textureId, index) => {
+                    const preview = document.querySelector(`#textureCards .theme-card-preview[data-texture-index="${index}"]`);
+                    if (preview) {
+                        renderTexture(textureId, `#textureCards .theme-card-preview[data-texture-index="${index}"]`);
+                    }
+                });
+            }, 100);
+        }
+
+        function showTexturePage() {
+            document.getElementById('landingPage').classList.add('hidden');
+            document.getElementById('texturePage').classList.add('active');
+            currentView = 'texture';
+            initTexturePage();
         }
 
         function showClockView() {
             document.getElementById('landingPage').classList.add('hidden');
+            document.getElementById('texturePage').classList.remove('active');
             document.getElementById('clockView').classList.add('active');
             currentView = 'clock';
+            clockAnimationEnabled = true;
+            renderTexture(currentTexture);
             updateClock();
         }
 
-        function showLandingPage() {
+        function backFromClockView() {
             document.getElementById('clockView').classList.remove('active');
+            document.getElementById('texturePage').classList.add('active');
+            currentView = 'texture';
+            clockAnimationEnabled = false;
+            // Re-initialize texture page to show the current theme
+            initTexturePage();
+        }
+
+        function backFromTexturePage() {
+            document.getElementById('texturePage').classList.remove('active');
             document.getElementById('landingPage').classList.remove('hidden');
             currentView = 'landing';
         }
@@ -1173,8 +1429,23 @@
         }
 
         // Event Listeners
-        document.getElementById('backBtn').addEventListener('click', showLandingPage);
-        document.getElementById('optionsBtn').addEventListener('click', openOptions);
+        document.getElementById('backBtn').addEventListener('click', backFromClockView);
+        document.getElementById('backFromTextureBtn').addEventListener('click', backFromTexturePage);
+        document.getElementById('saveSettingsBtn').addEventListener('click', function() {
+            saveConfigToStorage();
+            
+            // Show visual feedback
+            const btn = this;
+            const originalText = btn.textContent;
+            btn.textContent = '✓ Settings Saved!';
+            btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            }, 2000);
+        });
+        
         document.getElementById('closeOptionsGallery').addEventListener('click', closeOptions);
         document.getElementById('saveOptionsBtn').addEventListener('click', saveOptions);
 
