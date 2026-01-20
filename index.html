@@ -1231,6 +1231,12 @@
                 
                 card.appendChild(preview);
                 
+                // Highlight if this is the current theme
+                if (themeId === currentTheme) {
+                    card.style.borderColor = 'rgba(255,255,255,0.6)';
+                    card.style.background = 'rgba(255,255,255,0.08)';
+                }
+                
                 const name = document.createElement('div');
                 name.className = 'theme-card-name';
                 name.textContent = themeNames[themeId];
@@ -1240,6 +1246,14 @@
                 
                 card.addEventListener('click', () => {
                     currentTheme = themeId;
+                    // Update highlighting on all theme cards
+                    document.querySelectorAll('#themeCards .theme-card').forEach(c => {
+                        c.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                        c.style.background = 'rgba(255, 255, 255, 0.02)';
+                    });
+                    // Highlight the selected card
+                    card.style.borderColor = 'rgba(255,255,255,0.6)';
+                    card.style.background = 'rgba(255,255,255,0.08)';
                     showTexturePage();
                 });
                 
@@ -1294,6 +1308,12 @@
                 preview.appendChild(hoursRing);
                 
                 card.appendChild(preview);
+                
+                // Highlight if this is the current texture
+                if (textureId === currentTexture) {
+                    card.style.borderColor = 'rgba(255,255,255,0.6)';
+                    card.style.background = 'rgba(255,255,255,0.08)';
+                }
                 
                 const name = document.createElement('div');
                 name.className = 'theme-card-name';
@@ -1415,8 +1435,8 @@
         });
 
         // Initialize app
-        initLandingPage();
         const hadSavedConfig = loadConfig();
+        initLandingPage();
         if (hadSavedConfig) {
             showClockView();      // jump straight in
         }
