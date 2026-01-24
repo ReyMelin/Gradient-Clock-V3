@@ -1,0 +1,47 @@
+# Node
+node_modules/
+npm-debug.log
+package-lock.json
+
+# IDE - IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# IDE - VSCode
+.vscode/
+*.code-workspace
+
+# IDE - Visual Studio
+.vs/
+
+# Build artifacts
+dist/
+build/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Android
+android/app/build/
+android/.gradle/
+android/local.properties
+android/.idea/workspace.xml
+android/.idea/tasks.xml
+android/.idea/gradle.xml
+android/.idea/assetWizardSettings.xml
+android/.idea/dictionaries
+android/.idea/libraries
+android/.idea/caches
+android/.idea/modules.xml
+android/.idea/navEditor.xml
+
+# Capacitor
+.capacitor/
+capacitor.config.ts.bak
+
+# Public build folder
+public/
