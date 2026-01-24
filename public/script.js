@@ -477,16 +477,26 @@ document.addEventListener('visibilitychange', () => {
 // ============ CAPACITOR SNAPSHOT INTEGRATION ============
 // Dynamically load Capacitor plugin if available (for Android widget)
 let Snapshot = null;
+let snapshotPluginReady = false;
 
 // Try to load Capacitor plugin
-if (typeof window.Capacitor !== 'undefined') {
-    import('@capacitor/core').then(({ registerPlugin }) => {
-        Snapshot = registerPlugin('Snapshot');
-        console.log('Capacitor Snapshot plugin loaded');
-    }).catch(err => {
+async function initSnapshotPlugin() {
+    if (typeof window.Capacitor !== 'undefined' && window.Capacitor.isNativePlatform()) {
+        try {
+            const { registerPlugin } = await import('@capacitor/core');
+            Snapshot = registerPlugin('Snapshot');
+            snapshotPluginReady = true;
+            console.log('Capacitor Snapshot plugin loaded and ready');
+        } catch (err) {
+            console.log('Failed to load Capacitor plugin:', err);
+        }
+    } else {
         console.log('Running in browser mode (no Capacitor)');
-    });
+    }
 }
+
+// Initialize plugin immediately
+initSnapshotPlugin();
 
 /**
  * Capture and save a snapshot of the clock for the Android widget
@@ -494,13 +504,18 @@ if (typeof window.Capacitor !== 'undefined') {
 async function captureClockSnapshot() {
     try {
         const clockContainer = document.querySelector('.clock-container');
-        if (!clockContainer) return;
+        if (!clockContainer) {
+            console.log('Clock container not found');
+            return;
+        }
 
         // Check if html2canvas is available
         if (typeof html2canvas === 'undefined') {
             console.warn('html2canvas not loaded');
             return;
         }
+
+        console.log('Capturing clock snapshot...');
 
         // Use html2canvas to capture only the clock container
         const canvas = await html2canvas(clockContainer, {
@@ -510,11 +525,19 @@ async function captureClockSnapshot() {
         });
 
         const base64Data = canvas.toDataURL('image/png');
+        console.log('Canvas captured, data URL length:', base64Data.length);
         
-        // Call native Android plugin to save snapshot (only if available)
-        if (Snapshot) {
-            const result = await Snapshot.savePngBase64({ data: base64Data });
-            console.log('Widget snapshot saved:', result.path);
+        // Call native Android plugin to save snapshot
+        if (snapshotPluginReady && Snapshot) {
+            try {
+                const result = await Snapshot.savePngBase64({ data: base64Data });
+                console.log('✓ Widget snapshot saved successfully:', result.path);
+                if (result.success) {
+                    console.log('✓ File size:', result.size || 'unknown');
+                }
+            } catch (nativeErr) {
+                console.error('✗ Native save failed:', nativeErr);
+            }
         } else {
             console.log('Snapshot captured (browser mode - not saved to device)');
         }
