@@ -1,0 +1,32 @@
+{
+  "name": "gradient-clock-v3",
+  "version": "3.0.0",
+  "description": "Gradient Clock - A beautiful gradient-based clock application",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run copy",
+    "copy": "mkdir -p www && cp -r public/* www/",
+    "sync": "npx cap sync",
+    "sync:android": "npx cap sync android",
+    "open:android": "npx cap open android",
+    "build:android": "npm run build && npm run sync:android",
+    "add:android": "npx cap add android",
+    "update": "npx cap update"
+  },
+  "keywords": [
+    "clock",
+    "gradient",
+    "capacitor",
+    "android",
+    "widget"
+  ],
+  "author": "ReyMelin",
+  "license": "MIT",
+  "devDependencies": {
+    "@capacitor/cli": "^5.7.0"
+  },
+  "dependencies": {
+    "@capacitor/android": "^5.7.0",
+    "@capacitor/core": "^5.7.0"
+  }
+}

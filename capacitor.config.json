@@ -1,0 +1,9 @@
+{
+  "appId": "com.reymelin.gradientclock",
+  "appName": "Gradient Clock",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "android": {
+    "path": "android"
+  }
+}
