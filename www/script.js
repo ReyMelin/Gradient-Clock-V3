@@ -475,39 +475,25 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // ============ CAPACITOR SNAPSHOT INTEGRATION ============
-// Dynamically load Capacitor plugin if available (for Android widget)
+// Load Capacitor plugin from global object (no import needed)
 let Snapshot = null;
 let snapshotPluginReady = false;
-let capacitorCore = null;
 
-// Try to load Capacitor plugin
-async function initSnapshotPlugin() {
-    try {
-        // First, ensure Capacitor core is loaded
-        if (typeof window.Capacitor !== 'undefined') {
-            capacitorCore = await import('@capacitor/core');
-            
-            // Check if we're on a native platform
-            if (capacitorCore.Capacitor.isNativePlatform && capacitorCore.Capacitor.isNativePlatform()) {
-                console.log('Running on native Android platform');
-                
-                // Register the Snapshot plugin
-                Snapshot = capacitorCore.registerPlugin('Snapshot');
-                snapshotPluginReady = true;
-                console.log('✓ Capacitor Snapshot plugin loaded and ready');
-            } else {
-                console.log('Capacitor detected but not on native platform');
-            }
-        } else {
-            console.log('Running in browser mode (no Capacitor)');
-        }
-    } catch (err) {
-        console.error('Failed to load Capacitor plugin:', err);
+// Check if Capacitor is available and load plugin from global object
+if (window.Capacitor && window.Capacitor.Plugins) {
+    // Access the Snapshot plugin directly from the global Capacitor object
+    Snapshot = window.Capacitor.Plugins.Snapshot;
+    if (Snapshot) {
+        snapshotPluginReady = true;
+        console.log("✓ Snapshot plugin loaded from Capacitor.Plugins");
+    } else {
+        console.error("✗ Snapshot plugin not found in Capacitor.Plugins");
     }
+} else if (window.Capacitor) {
+    console.log("Capacitor found but Plugins object not available");
+} else {
+    console.log("Running in browser mode (no Capacitor)");
 }
-
-// Initialize plugin immediately
-initSnapshotPlugin();
 
 /**
  * Capture and save a snapshot of the clock for the Android widget
