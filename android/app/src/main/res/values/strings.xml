@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Gradient Clock</string>
+    <string name="title_activity_main">Gradient Clock</string>
+    <string name="package_name">com.reymelin.gradientclock</string>
+    <string name="custom_url_scheme">com.reymelin.gradientclock</string>
+    <string name="wallpaper_description">Live wallpaper for Gradient Clock</string>
+
+    <!-- Widget Config -->
+    <string name="widget_config_title">Widget Settings</string>
+    <string name="confirm">Confirm</string>
+
+    <!-- Settings screen -->
+    <string name="wallpaper_settings">Wallpaper Settings</string>
+    <string name="theme_label">Theme</string>
+    <string name="time_format_label">Time format</string>
+    <string name="save">Save</string>
+
+    <!-- Themes -->
+    <string name="theme_metallic">Metallic</string>
+    <string name="theme_winter">Winter</string>
+    <string name="theme_fall">Fall</string>
+    <string name="theme_space">Space</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_christmas">Christmas</string>
+    <string name="theme_halloween">Halloween</string>
+    <string name="theme_flowerpower">Flower Power</string>
+    <string name="theme_rgb">RGB</string>
+
+    <!-- Time formats -->
+    <string name="format_none">None</string>
+    <string name="format_24h">24-hour</string>
+    <string name="format_ampm">AM/PM</string>
+
+</resources>

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@color/config_background">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/wallpaper_settings"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/text_primary"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/theme_label"
+        android:textSize="18sp"
+        android:textColor="@color/text_primary"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <RadioGroup
+                android:id="@+id/theme_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RadioButton
+                    android:id="@+id/theme_metallic"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/theme_metallic"
+                    android:tag="metallic"
+                    android:padding="12dp" />
+
+                <RadioButton
+                    android:id="@+id/theme_winter"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/theme_winter"
+                    android:tag="winter"
+                    android:padding="12dp" />
+
+                <RadioButton
+                    android:id="@+id/theme_fall"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/theme_fall"
+                    android:tag="fall"
+                    android:padding="12dp" />
+
+                <RadioButton
+                    android:id="@+id/theme_space"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/theme_space"
+                    android:tag="space"
+                    android:padding="12dp" />
+
+                <RadioButton
+                    android:id="@+id/theme_dark"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/theme_dark"
+                    android:tag="dark"
+                    android:padding="12dp" />
+
+                <RadioButton
+                    android:id="@+id/theme_christmas"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/theme_christmas"
+                    android:tag="christmas"
+                    android:padding="12dp" />
+
+                <RadioButton
+                    android:id="@+id/theme_halloween"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/theme_halloween"
+                    android:tag="halloween"
+                    android:padding="12dp" />
+
+                <RadioButton
+                    android:id="@+id/theme_flowerpower"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/theme_flowerpower"
+                    android:tag="flowerpower"
+                    android:padding="12dp" />
+
+                <RadioButton
+                    android:id="@+id/theme_rgb"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/theme_rgb"
+                    android:tag="rgb"
+                    android:padding="12dp" />
+            </RadioGroup>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/time_format_label"
+                android:textSize="18sp"
+                android:textColor="@color/text_primary"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp" />
+
+            <RadioGroup
+                android:id="@+id/time_format_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RadioButton
+                    android:id="@+id/format_none"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/format_none"
+                    android:tag="none"
+                    android:padding="12dp" />
+
+                <RadioButton
+                    android:id="@+id/format_24h"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/format_24h"
+                    android:tag="military"
+                    android:padding="12dp" />
+
+                <RadioButton
+                    android:id="@+id/format_ampm"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/format_ampm"
+                    android:tag="ampm"
+                    android:padding="12dp" />
+            </RadioGroup>
+        </LinearLayout>
+    </ScrollView>
+
+    <Button
+        android:id="@+id/save_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/save"
+        android:layout_marginTop="16dp"
+        android:textSize="16sp" />
+
+</LinearLayout>

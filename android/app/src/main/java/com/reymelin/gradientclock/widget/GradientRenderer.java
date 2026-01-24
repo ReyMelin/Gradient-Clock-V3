@@ -1,0 +1,78 @@
+package com.reymelin.gradientclock.widget;
+
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.util.Log;
+import java.io.File;
+
+public class GradientRenderer {
+
+    private static final String SNAPSHOT_FILENAME = "clock_snapshot.png";
+
+    public static boolean saveSnapshot(Context context, Bitmap bmp) {
+        if (bmp == null) return false;
+
+        File outFile = new File(context.getFilesDir(), SNAPSHOT_FILENAME);
+        try (java.io.FileOutputStream fos = new java.io.FileOutputStream(outFile)) {
+            boolean ok = bmp.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.flush();
+            Log.d("GradientRenderer", "Snapshot saved: " + outFile.getAbsolutePath() + " ok=" + ok + " bytes=" + outFile.length());
+            return ok && outFile.length() > 0;
+        } catch (Exception e) {
+            Log.e("GradientRenderer", "Failed saving snapshot: " + outFile.getAbsolutePath(), e);
+            return false;
+        }
+    }
+
+    public static Bitmap renderWidgetBitmap(Context context, int width, int height) {
+        File snapshotFile = new File(context.getFilesDir(), SNAPSHOT_FILENAME);
+
+        if (snapshotFile.exists() && snapshotFile.length() > 0) {
+            Bitmap snapshot = BitmapFactory.decodeFile(snapshotFile.getAbsolutePath());
+            if (snapshot != null) {
+                int size = Math.min(width, height);
+                Bitmap output = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(output);
+                
+                int paddedSize = (int) (size * 0.98f);
+                int margin = (size - paddedSize) / 2;
+
+                Bitmap scaled = Bitmap.createScaledBitmap(snapshot, paddedSize, paddedSize, true);
+
+                final Paint paint = new Paint();
+                paint.setAntiAlias(true);
+                
+                // Draw circular mask
+                canvas.drawARGB(0, 0, 0, 0);
+                canvas.drawCircle(size / 2f, size / 2f, paddedSize / 2f, paint);
+                
+                // Overlay the snapshot inside the circle
+                paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+                canvas.drawBitmap(scaled, margin, margin, paint);
+
+                if (scaled != snapshot) scaled.recycle();
+                snapshot.recycle();
+
+                Log.d("GradientRenderer", "Snapshot rendered successfully: " + snapshotFile.getAbsolutePath());
+                return output;
+            }
+        }
+
+        // FALLBACK: If no snapshot, return a visible red circle to prove the widget is working
+        Log.e("GradientRenderer", "Snapshot MISSING or INVALID at " + snapshotFile.getAbsolutePath());
+        int size = Math.min(width, height);
+        Bitmap fallback = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(fallback);
+        Paint paint = new Paint();
+        paint.setColor(Color.RED);
+        paint.setAntiAlias(true);
+        canvas.drawCircle(size / 2f, size / 2f, size / 2.5f, paint);
+        return fallback;
+    }
+}
