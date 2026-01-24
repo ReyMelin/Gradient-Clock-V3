@@ -1,3 +1,10 @@
+// Capacitor Plugin Registration
+let Snapshot = null;
+if (typeof Capacitor !== 'undefined') {
+    const { registerPlugin } = Capacitor;
+    Snapshot = registerPlugin('Snapshot');
+}
+
 const romanNumerals = ['XII', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'];
 
 const themes = {
@@ -440,22 +447,77 @@ function backFromTexturePage() {
     initLandingPage(); // refresh highlight
 }
 
+// Widget Update Function
+async function updateWidget() {
+    try {
+        // Check if Capacitor and Snapshot plugin are available
+        if (!Snapshot) {
+            console.warn('Snapshot plugin not available - running in web mode');
+            return;
+        }
+
+        // Get the clock container element
+        const clockContainer = document.querySelector('.clock-container');
+        if (!clockContainer) {
+            console.error('Clock container not found');
+            return;
+        }
+
+        // Use html2canvas to capture the clock as an image
+        const canvas = await html2canvas(clockContainer, {
+            backgroundColor: null,
+            scale: 2, // Higher quality
+            logging: false,
+            useCORS: true
+        });
+
+        // Convert canvas to base64 PNG
+        const base64Data = canvas.toDataURL('image/png');
+        
+        // Remove the data URL prefix to get just the base64 string
+        const base64String = base64Data.replace(/^data:image\/png;base64,/, '');
+
+        // Send to native plugin
+        await Snapshot.savePngBase64({ data: base64String });
+        
+        console.log('Widget updated successfully');
+        return true;
+    } catch (error) {
+        console.error('Error updating widget:', error);
+        return false;
+    }
+}
+
 // Event Listeners
 document.getElementById('backBtn').addEventListener('click', backFromClockView);
 document.getElementById('backFromTextureBtn').addEventListener('click', backFromTexturePage);
-document.getElementById('openWidgetBtn').addEventListener('click', function() {
-    // Open widget functionality - for now, auto-save settings
+document.getElementById('openWidgetBtn').addEventListener('click', async function() {
+    // Save settings
     saveConfigToStorage();
     
-    // Show visual feedback
+    // Show loading feedback
     const btn = this;
     const originalText = btn.textContent;
-    btn.textContent = '✓ Widget Ready!';
-    btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+    btn.textContent = '⏳ Updating Widget...';
+    btn.disabled = true;
+    
+    try {
+        // Capture and send clock image to widget
+        const success = await updateWidget();
+        
+        // Show success or fallback feedback
+        btn.textContent = success ? '✓ Widget Updated!' : '✓ Settings Saved!';
+        btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+    } catch (error) {
+        console.error('Widget update failed:', error);
+        btn.textContent = '✓ Settings Saved!';
+        btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+    }
     
     setTimeout(() => {
         btn.textContent = originalText;
         btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        btn.disabled = false;
     }, 2000);
 });
 

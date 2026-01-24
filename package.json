@@ -1,0 +1,16 @@
+{
+  "name": "gradient-clock-v3",
+  "version": "1.0.0",
+  "description": "Gradient Clock with Capacitor Widget Support",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Entler Entertainment",
+  "license": "ISC",
+  "dependencies": {
+    "@capacitor/core": "^6.0.0",
+    "html2canvas": "^1.4.1"
+  }
+}
