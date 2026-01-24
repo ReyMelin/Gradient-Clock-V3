@@ -10,22 +10,23 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.util.Log;
 import java.io.File;
+import java.io.FileOutputStream;
 
 public class GradientRenderer {
 
+    // Must match ClockSnapshotPlugin.FILENAME
     private static final String SNAPSHOT_FILENAME = "clock_snapshot.png";
 
     public static boolean saveSnapshot(Context context, Bitmap bmp) {
         if (bmp == null) return false;
-
         File outFile = new File(context.getFilesDir(), SNAPSHOT_FILENAME);
-        try (java.io.FileOutputStream fos = new java.io.FileOutputStream(outFile)) {
+        try (FileOutputStream fos = new FileOutputStream(outFile)) {
             boolean ok = bmp.compress(Bitmap.CompressFormat.PNG, 100, fos);
             fos.flush();
-            Log.d("GradientRenderer", "Snapshot saved: " + outFile.getAbsolutePath() + " ok=" + ok + " bytes=" + outFile.length());
-            return ok && outFile.length() > 0;
+            Log.d("GradientRenderer", "Manual snapshot saved: " + outFile.getAbsolutePath() + " ok=" + ok);
+            return ok;
         } catch (Exception e) {
-            Log.e("GradientRenderer", "Failed saving snapshot: " + outFile.getAbsolutePath(), e);
+            Log.e("GradientRenderer", "Failed manual save", e);
             return false;
         }
     }
@@ -33,7 +34,17 @@ public class GradientRenderer {
     public static Bitmap renderWidgetBitmap(Context context, int width, int height) {
         File snapshotFile = new File(context.getFilesDir(), SNAPSHOT_FILENAME);
 
-        if (snapshotFile.exists() && snapshotFile.length() > 0) {
+        if (!snapshotFile.exists()) {
+            Log.e("GradientRenderer", "Snapshot FILE MISSING at " + snapshotFile.getAbsolutePath());
+            return createErrorBitmap(width, height, Color.RED); // Red = Missing
+        }
+
+        if (snapshotFile.length() == 0) {
+            Log.e("GradientRenderer", "Snapshot FILE EMPTY at " + snapshotFile.getAbsolutePath());
+            return createErrorBitmap(width, height, Color.YELLOW); // Yellow = Empty
+        }
+
+        try {
             Bitmap snapshot = BitmapFactory.decodeFile(snapshotFile.getAbsolutePath());
             if (snapshot != null) {
                 int size = Math.min(width, height);
@@ -62,17 +73,21 @@ public class GradientRenderer {
                 Log.d("GradientRenderer", "Snapshot rendered successfully: " + snapshotFile.getAbsolutePath());
                 return output;
             }
+        } catch (Exception e) {
+            Log.e("GradientRenderer", "Failed to decode snapshot", e);
         }
 
-        // FALLBACK: If no snapshot, return a visible red circle to prove the widget is working
-        Log.e("GradientRenderer", "Snapshot MISSING or INVALID at " + snapshotFile.getAbsolutePath());
+        return createErrorBitmap(width, height, Color.MAGENTA); // Magenta = Decode Error
+    }
+
+    private static Bitmap createErrorBitmap(int width, int height, int color) {
         int size = Math.min(width, height);
-        Bitmap fallback = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(fallback);
+        Bitmap bmp = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bmp);
         Paint paint = new Paint();
-        paint.setColor(Color.RED);
+        paint.setColor(color);
         paint.setAntiAlias(true);
-        canvas.drawCircle(size / 2f, size / 2f, size / 2.5f, paint);
-        return fallback;
+        canvas.drawCircle(size / 2f, size / 2f, size / 3f, paint);
+        return bmp;
     }
 }

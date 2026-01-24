@@ -1,26 +1,32 @@
 {
   "name": "gradient-clock-v3",
-  "version": "1.0.0",
-  "description": "A beautiful, customizable gradient clock with an intuitive three-step setup flow.",
+  "version": "3.0.0",
+  "description": "Gradient Clock - A beautiful gradient-based clock application",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npm run copy",
+    "copy": "mkdir -p www && cp -r public/* www/",
+    "sync": "npx cap sync",
+    "sync:android": "npx cap sync android",
+    "open:android": "npx cap open android",
+    "build:android": "npm run build && npm run sync:android",
+    "add:android": "npx cap add android",
+    "update": "npx cap update"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ReyMelin/Gradient-Clock-V3.git"
+  "keywords": [
+    "clock",
+    "gradient",
+    "capacitor",
+    "android",
+    "widget"
+  ],
+  "author": "ReyMelin",
+  "license": "MIT",
+  "devDependencies": {
+    "@capacitor/cli": "^5.7.0"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/ReyMelin/Gradient-Clock-V3/issues"
-  },
-  "homepage": "https://github.com/ReyMelin/Gradient-Clock-V3#readme",
   "dependencies": {
-    "@capacitor/android": "^8.0.1",
-    "@capacitor/cli": "^8.0.1",
-    "@capacitor/core": "^8.0.1"
+    "@capacitor/android": "^5.7.0",
+    "@capacitor/core": "^5.7.0"
   }
 }

@@ -1,7 +1,6 @@
 package com.reymelin.gradientclock;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.content.Context;
 import android.util.Base64;
 import android.util.Log;
 
@@ -10,52 +9,57 @@ import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
-import com.reymelin.gradientclock.widget.GradientClockWidgetProvider;
-import com.reymelin.gradientclock.widget.GradientRenderer;
 
-@CapacitorPlugin(name = "ClockSnapshot")
+import java.io.File;
+import java.io.FileOutputStream;
+
+@CapacitorPlugin(name = "Snapshot")
 public class ClockSnapshotPlugin extends Plugin {
 
-    @PluginMethod
-    public void saveSnapshot(PluginCall call) {
-        String dataUrl = call.getString("dataUrl");
+    private static final String TAG = "SnapshotPlugin";
+    private static final String FILENAME = "clock_snapshot.png";
 
-        if (dataUrl == null) {
-            call.reject("Missing dataUrl");
+    @PluginMethod
+    public void savePngBase64(PluginCall call) {
+        String dataUrlOrBase64 = call.getString("data");
+        Log.d(TAG, "savePngBase64 called. Data received: " + (dataUrlOrBase64 != null ? "YES" : "NO"));
+
+        if (dataUrlOrBase64 == null || dataUrlOrBase64.isEmpty()) {
+            call.reject("Missing 'data'");
             return;
         }
 
         try {
-            String base64Data = dataUrl;
-            if (dataUrl.contains(",")) {
-                base64Data = dataUrl.split(",")[1];
+            String base64 = dataUrlOrBase64;
+            int comma = base64.indexOf(',');
+            if (base64.startsWith("data:") && comma >= 0) {
+                base64 = base64.substring(comma + 1);
             }
 
-            byte[] decodedBytes = Base64.decode(base64Data, Base64.DEFAULT);
-            Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+            byte[] bytes = Base64.decode(base64, Base64.DEFAULT);
 
-            if (bitmap == null) {
-                call.reject("Failed to decode bitmap");
-                return;
+            Context ctx = getContext();
+            File outFile = new File(ctx.getFilesDir(), FILENAME);
+
+            try (FileOutputStream fos = new FileOutputStream(outFile, false)) {
+                fos.write(bytes);
+                fos.flush();
             }
 
-            // Use the centralized save logic in GradientRenderer
-            boolean ok = GradientRenderer.saveSnapshot(getContext(), bitmap);
-            bitmap.recycle();
+            long len = outFile.length();
+            Log.d(TAG, "SUCCESS! Snapshot saved to: " + outFile.getAbsolutePath() + " (" + len + " bytes)");
 
-            if (ok) {
-                // Trigger widget update immediately
-                GradientClockWidgetProvider.updateAll(getContext());
+            JSObject ret = new JSObject();
+            ret.put("path", outFile.getAbsolutePath());
+            ret.put("success", true);
+            call.resolve(ret);
 
-                JSObject result = new JSObject();
-                result.put("success", true);
-                call.resolve(result);
-            } else {
-                call.reject("Failed to save snapshot to disk");
-            }
+            // Notify the widget to update immediately now that a new image exists
+            com.reymelin.gradientclock.widget.GradientClockWidgetProvider.updateAll(ctx);
+
         } catch (Exception e) {
-            Log.e("ClockSnapshot", "Error saving snapshot", e);
-            call.reject("Failed: " + e.getMessage());
+            Log.e(TAG, "CRITICAL: Failed saving snapshot", e);
+            call.reject("Failed saving snapshot: " + e.getMessage());
         }
     }
 }
