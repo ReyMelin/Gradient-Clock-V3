@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Widget and Config Colors -->
+    <color name="widget_background">#0a0a0a</color>
+    <color name="config_background">#ffffff</color>
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    
+    <!-- Accent Colors -->
+    <color name="accent_gradient_start">#667eea</color>
+    <color name="accent_gradient_end">#764ba2</color>
+</resources>
