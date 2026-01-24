@@ -478,20 +478,31 @@ document.addEventListener('visibilitychange', () => {
 // Dynamically load Capacitor plugin if available (for Android widget)
 let Snapshot = null;
 let snapshotPluginReady = false;
+let capacitorCore = null;
 
 // Try to load Capacitor plugin
 async function initSnapshotPlugin() {
-    if (typeof window.Capacitor !== 'undefined' && window.Capacitor.isNativePlatform()) {
-        try {
-            const { registerPlugin } = await import('@capacitor/core');
-            Snapshot = registerPlugin('Snapshot');
-            snapshotPluginReady = true;
-            console.log('Capacitor Snapshot plugin loaded and ready');
-        } catch (err) {
-            console.log('Failed to load Capacitor plugin:', err);
+    try {
+        // First, ensure Capacitor core is loaded
+        if (typeof window.Capacitor !== 'undefined') {
+            capacitorCore = await import('@capacitor/core');
+            
+            // Check if we're on a native platform
+            if (capacitorCore.Capacitor.isNativePlatform && capacitorCore.Capacitor.isNativePlatform()) {
+                console.log('Running on native Android platform');
+                
+                // Register the Snapshot plugin
+                Snapshot = capacitorCore.registerPlugin('Snapshot');
+                snapshotPluginReady = true;
+                console.log('✓ Capacitor Snapshot plugin loaded and ready');
+            } else {
+                console.log('Capacitor detected but not on native platform');
+            }
+        } else {
+            console.log('Running in browser mode (no Capacitor)');
         }
-    } else {
-        console.log('Running in browser mode (no Capacitor)');
+    } catch (err) {
+        console.error('Failed to load Capacitor plugin:', err);
     }
 }
 
@@ -525,21 +536,24 @@ async function captureClockSnapshot() {
         });
 
         const base64Data = canvas.toDataURL('image/png');
-        console.log('Canvas captured, data URL length:', base64Data.length);
+        console.log('✓ Canvas captured, data URL length:', base64Data.length);
         
         // Call native Android plugin to save snapshot
         if (snapshotPluginReady && Snapshot) {
             try {
+                console.log('Calling Snapshot.savePngBase64...');
                 const result = await Snapshot.savePngBase64({ data: base64Data });
-                console.log('✓ Widget snapshot saved successfully:', result.path);
-                if (result.success) {
-                    console.log('✓ File size:', result.size || 'unknown');
+                console.log('✓ Widget snapshot saved successfully:', result);
+                if (result.path) {
+                    console.log('✓ Saved to:', result.path);
                 }
             } catch (nativeErr) {
                 console.error('✗ Native save failed:', nativeErr);
             }
         } else {
             console.log('Snapshot captured (browser mode - not saved to device)');
+            console.log('- snapshotPluginReady:', snapshotPluginReady);
+            console.log('- Snapshot:', Snapshot ? 'exists' : 'null');
         }
         
     } catch (err) {
