@@ -836,3 +836,5 @@ if (hadSavedConfig) {
 
 // Start automatic snapshots for widget
 startAutoSnapshots();
+
+}
