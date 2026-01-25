@@ -196,9 +196,13 @@ function updateClock() {
     const minutesRing = document.querySelector('.minutes-ring');
     const hoursRing = document.querySelector('.hours-ring');
 
-    secondsRing.style.background = generateGradient(secondsAngle, theme.seconds);
-    minutesRing.style.background = generateGradient(minutesAngle, theme.minutes);
-    hoursRing.style.background = generateGradient(hoursAngle, theme.hours);
+    if (secondsRing && minutesRing && hoursRing) {
+        secondsRing.style.background = generateGradient(secondsAngle, theme.seconds);
+        minutesRing.style.background = generateGradient(minutesAngle, theme.minutes);
+        hoursRing.style.background = generateGradient(hoursAngle, theme.hours);
+    } else {
+        console.warn('Clock rings not found in DOM!');
+    }
 }
 
 // Global variables
@@ -538,6 +542,14 @@ async function captureClockSnapshot() {
         }
 
         console.log('Capturing clock snapshot...');
+        
+        // Debug: Check if rings have backgrounds
+        const secondsRing = document.querySelector('.seconds-ring');
+        const minutesRing = document.querySelector('.minutes-ring');
+        const hoursRing = document.querySelector('.hours-ring');
+        if (secondsRing) console.log('Seconds ring background:', secondsRing.style.background.substring(0, 50) + '...');
+        if (minutesRing) console.log('Minutes ring background:', minutesRing.style.background.substring(0, 50) + '...');
+        if (hoursRing) console.log('Hours ring background:', hoursRing.style.background.substring(0, 50) + '...');
 
         // Use html2canvas to capture only the clock container
         const canvas = await html2canvas(clockContainer, {
