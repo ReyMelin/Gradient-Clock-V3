@@ -582,12 +582,14 @@ function startAutoSnapshots() {
         initializeCapacitorPlugin();
     }
     
-    // Save initial snapshot after 500ms (when clock is rendered)
+    // Save initial snapshot after 1500ms to ensure clock is fully rendered
+    // (includes time for CSS transitions and clock animation frames)
     setTimeout(() => {
         if (currentView === 'clock') {
+            console.log('Taking initial snapshot...');
             captureClockSnapshot();
         }
-    }, 500);
+    }, 1500);
     
     // Auto-save every 30 seconds to keep widget current
     setInterval(() => {
