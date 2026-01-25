@@ -511,12 +511,12 @@ document.getElementById('openWidgetBtn').addEventListener('click', () => {
     showSnapshotView();
     console.log('Snapshot view should now be visible');
     
-    // Capture snapshot after a delay to ensure rendering
+    // Capture snapshot after a longer delay so you can see the screen
     setTimeout(() => {
         console.log('Starting snapshot capture...');
         captureClockSnapshot();
         
-        // Return to clock view after capture
+        // Return to clock view after capture - longer delay so user can see it
         setTimeout(() => {
             console.log('Hiding snapshot view...');
             hideSnapshotView();
@@ -532,8 +532,8 @@ document.getElementById('openWidgetBtn').addEventListener('click', () => {
             } else {
                 console.log('Not on native platform, skipping widget settings');
             }
-        }, 1000);
-    }, 500);
+        }, 2000); // Wait 2 seconds so user can see the snapshot view
+    }, 1000); // Wait 1 second for snapshot view to fully render
 });
 
 let resizeTimeout;
@@ -599,7 +599,6 @@ if (document.readyState === 'loading') {
 
 /**
  * Capture and save a snapshot of the clock for the Android widget
- * Note: html2canvas doesn't support conic-gradient, so we render manually to canvas
  */
 async function captureClockSnapshot() {
     try {
@@ -611,13 +610,68 @@ async function captureClockSnapshot() {
         }
 
         console.log('Capturing clock snapshot...');
+        console.log('- Current theme:', currentTheme);
+        console.log('- Current texture:', currentTexture);
         
-        // Create a canvas and draw the clock manually since html2canvas doesn't support conic-gradient
-        const size = 800; // Widget size
+        // Check if html2canvas is available
+        if (typeof html2canvas === 'undefined') {
+            console.warn('html2canvas not loaded, using manual canvas rendering');
+            await captureManualCanvas();
+            return;
+        }
+        
+        // Use html2canvas to capture the snapshot view
+        const canvas = await html2canvas(clockContainer, {
+            backgroundColor: '#000000',
+            scale: 2,
+            logging: true,
+            allowTaint: true,
+            useCORS: true
+        });
+
+        const base64Data = canvas.toDataURL('image/png');
+        console.log('✓ Canvas captured, data URL length:', base64Data.length);
+        
+        // Call native Android plugin to save snapshot
+        if (snapshotPluginReady && Snapshot) {
+            try {
+                console.log('Calling Snapshot.savePngBase64...');
+                const result = await Snapshot.savePngBase64({ data: base64Data });
+                console.log('✓ Widget snapshot saved successfully:', result);
+                if (result.path) {
+                    console.log('✓ Saved to:', result.path);
+                }
+            } catch (nativeErr) {
+                console.error('✗ Native save failed:', nativeErr);
+            }
+        } else {
+            console.log('Snapshot captured (browser mode - not saved to device)');
+            console.log('- snapshotPluginReady:', snapshotPluginReady);
+            console.log('- Snapshot:', Snapshot ? 'exists' : 'null');
+        }
+        
+    } catch (err) {
+        console.error('Snapshot capture failed:', err);
+    }
+}
+
+/**
+ * Fallback: Manual canvas rendering when html2canvas isn't available
+ */
+async function captureManualCanvas() {
+    try {
+        console.log('Using manual canvas rendering...');
+        
+        // Create a canvas and draw the clock manually
+        const size = 800;
         const canvas = document.createElement('canvas');
         canvas.width = size;
         canvas.height = size;
         const ctx = canvas.getContext('2d');
+        
+        // Black background
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0, 0, size, size);
         
         // Get current time for gradient angles
         const now = new Date();
@@ -642,25 +696,20 @@ async function captureClockSnapshot() {
         }
         
         const base64Data = canvas.toDataURL('image/png');
-        console.log('✓ Canvas captured, data URL length:', base64Data.length);
+        console.log('✓ Manual canvas captured, data URL length:', base64Data.length);
         
-        // Call native Android plugin to save snapshot
+        // Save to device
         if (snapshotPluginReady && Snapshot) {
             try {
-                console.log('Calling Snapshot.savePngBase64...');
                 const result = await Snapshot.savePngBase64({ data: base64Data });
                 console.log('✓ Widget snapshot saved successfully:', result);
-                if (result.path) {
-                    console.log('✓ Saved to:', result.path);
-                }
             } catch (nativeErr) {
                 console.error('✗ Native save failed:', nativeErr);
             }
-        } else {
-            console.log('Snapshot captured (browser mode - not saved to device)');
-            console.log('- snapshotPluginReady:', snapshotPluginReady);
-            console.log('- Snapshot:', Snapshot ? 'exists' : 'null');
         }
+    } catch (err) {
+        console.error('Manual canvas capture failed:', err);
+    }
         
     } catch (err) {
         console.error('Snapshot capture failed:', err);
