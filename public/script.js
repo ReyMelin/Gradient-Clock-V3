@@ -551,12 +551,12 @@ async function captureClockSnapshot() {
  * Start automatic snapshot updates for widget
  */
 function startAutoSnapshots() {
-    // Save initial snapshot after 2 seconds (when clock is rendered)
+    // Save initial snapshot after 500ms (when clock is rendered)
     setTimeout(() => {
         if (currentView === 'clock') {
             captureClockSnapshot();
         }
-    }, 2000);
+    }, 500);
     
     // Auto-save every 30 seconds to keep widget current
     setInterval(() => {

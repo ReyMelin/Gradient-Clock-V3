@@ -22,7 +22,7 @@ public class GradientClockWidgetProvider extends AppWidgetProvider {
         super.onReceive(context, intent);
         if (WidgetUpdateScheduler.ACTION_AUTO_UPDATE.equals(intent.getAction())) {
             updateAll(context);
-            // Re-schedule for another 90 seconds
+            // Re-schedule for another 30 seconds
             WidgetUpdateScheduler.ensureScheduled(context);
         }
     }

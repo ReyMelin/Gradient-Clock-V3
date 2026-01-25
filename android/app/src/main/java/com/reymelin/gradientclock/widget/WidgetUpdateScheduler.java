@@ -26,7 +26,7 @@ public class WidgetUpdateScheduler {
 
         PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent, flags);
 
-        long interval = 90_000L; // 90 seconds (best-effort)
+        long interval = 30_000L; // 30 seconds to match JS snapshot frequency
         long triggerAt = System.currentTimeMillis() + interval;
 
         // ❌ NO exact alarms (prevents crash + policy violations)
@@ -36,7 +36,7 @@ public class WidgetUpdateScheduler {
                 pi
         );
 
-        Log.d("WidgetScheduler", "Best-effort widget update scheduled");
+        Log.d("WidgetScheduler", "Widget update scheduled every 30s");
     }
 
     public static void cancel(Context context) {
