@@ -475,17 +475,49 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // ============ CAPACITOR SNAPSHOT INTEGRATION ============
-// Dynamically load Capacitor plugin if available (for Android widget)
+// Load Capacitor plugin from global object (no import needed)
 let Snapshot = null;
+let snapshotPluginReady = false;
 
-// Try to load Capacitor plugin
-if (typeof window.Capacitor !== 'undefined') {
-    import('@capacitor/core').then(({ registerPlugin }) => {
-        Snapshot = registerPlugin('Snapshot');
-        console.log('Capacitor Snapshot plugin loaded');
-    }).catch(err => {
-        console.log('Running in browser mode (no Capacitor)');
+/**
+ * Initialize Capacitor plugin when platform is ready
+ */
+function initializeCapacitorPlugin() {
+    if (window.Capacitor && window.Capacitor.Plugins) {
+        // Access the Snapshot plugin directly from the global Capacitor object
+        Snapshot = window.Capacitor.Plugins.Snapshot;
+        if (Snapshot) {
+            snapshotPluginReady = true;
+            console.log("✓ Snapshot plugin loaded from Capacitor.Plugins");
+        } else {
+            console.error("✗ Snapshot plugin not found in Capacitor.Plugins");
+        }
+    } else if (window.Capacitor) {
+        console.log("Capacitor found but Plugins object not available");
+    } else {
+        console.log("Running in browser mode (no Capacitor)");
+    }
+}
+
+// Check for plugin immediately (might work in some cases)
+initializeCapacitorPlugin();
+
+// Also try again when DOM is fully loaded (helps ensure Capacitor is ready)
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!snapshotPluginReady) {
+            console.log("Re-checking Snapshot plugin after DOMContentLoaded...");
+            initializeCapacitorPlugin();
+        }
     });
+} else {
+    // DOM already loaded, try once more after a short delay
+    setTimeout(() => {
+        if (!snapshotPluginReady) {
+            console.log("Re-checking Snapshot plugin after delay...");
+            initializeCapacitorPlugin();
+        }
+    }, 100);
 }
 
 /**
@@ -494,13 +526,18 @@ if (typeof window.Capacitor !== 'undefined') {
 async function captureClockSnapshot() {
     try {
         const clockContainer = document.querySelector('.clock-container');
-        if (!clockContainer) return;
+        if (!clockContainer) {
+            console.log('Clock container not found');
+            return;
+        }
 
         // Check if html2canvas is available
         if (typeof html2canvas === 'undefined') {
             console.warn('html2canvas not loaded');
             return;
         }
+
+        console.log('Capturing clock snapshot...');
 
         // Use html2canvas to capture only the clock container
         const canvas = await html2canvas(clockContainer, {
@@ -510,13 +547,24 @@ async function captureClockSnapshot() {
         });
 
         const base64Data = canvas.toDataURL('image/png');
+        console.log('✓ Canvas captured, data URL length:', base64Data.length);
         
-        // Call native Android plugin to save snapshot (only if available)
-        if (Snapshot) {
-            const result = await Snapshot.savePngBase64({ data: base64Data });
-            console.log('Widget snapshot saved:', result.path);
+        // Call native Android plugin to save snapshot
+        if (snapshotPluginReady && Snapshot) {
+            try {
+                console.log('Calling Snapshot.savePngBase64...');
+                const result = await Snapshot.savePngBase64({ data: base64Data });
+                console.log('✓ Widget snapshot saved successfully:', result);
+                if (result.path) {
+                    console.log('✓ Saved to:', result.path);
+                }
+            } catch (nativeErr) {
+                console.error('✗ Native save failed:', nativeErr);
+            }
         } else {
             console.log('Snapshot captured (browser mode - not saved to device)');
+            console.log('- snapshotPluginReady:', snapshotPluginReady);
+            console.log('- Snapshot:', Snapshot ? 'exists' : 'null');
         }
         
     } catch (err) {
@@ -528,12 +576,18 @@ async function captureClockSnapshot() {
  * Start automatic snapshot updates for widget
  */
 function startAutoSnapshots() {
-    // Save initial snapshot after 2 seconds (when clock is rendered)
+    // Ensure plugin is initialized before first snapshot attempt
+    if (!snapshotPluginReady) {
+        console.log("Plugin not ready yet, re-checking before first snapshot...");
+        initializeCapacitorPlugin();
+    }
+    
+    // Save initial snapshot after 500ms (when clock is rendered)
     setTimeout(() => {
         if (currentView === 'clock') {
             captureClockSnapshot();
         }
-    }, 2000);
+    }, 500);
     
     // Auto-save every 30 seconds to keep widget current
     setInterval(() => {

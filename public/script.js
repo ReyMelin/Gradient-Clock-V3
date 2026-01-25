@@ -479,20 +479,45 @@ document.addEventListener('visibilitychange', () => {
 let Snapshot = null;
 let snapshotPluginReady = false;
 
-// Check if Capacitor is available and load plugin from global object
-if (window.Capacitor && window.Capacitor.Plugins) {
-    // Access the Snapshot plugin directly from the global Capacitor object
-    Snapshot = window.Capacitor.Plugins.Snapshot;
-    if (Snapshot) {
-        snapshotPluginReady = true;
-        console.log("✓ Snapshot plugin loaded from Capacitor.Plugins");
+/**
+ * Initialize Capacitor plugin when platform is ready
+ */
+function initializeCapacitorPlugin() {
+    if (window.Capacitor && window.Capacitor.Plugins) {
+        // Access the Snapshot plugin directly from the global Capacitor object
+        Snapshot = window.Capacitor.Plugins.Snapshot;
+        if (Snapshot) {
+            snapshotPluginReady = true;
+            console.log("✓ Snapshot plugin loaded from Capacitor.Plugins");
+        } else {
+            console.error("✗ Snapshot plugin not found in Capacitor.Plugins");
+        }
+    } else if (window.Capacitor) {
+        console.log("Capacitor found but Plugins object not available");
     } else {
-        console.error("✗ Snapshot plugin not found in Capacitor.Plugins");
+        console.log("Running in browser mode (no Capacitor)");
     }
-} else if (window.Capacitor) {
-    console.log("Capacitor found but Plugins object not available");
+}
+
+// Check for plugin immediately (might work in some cases)
+initializeCapacitorPlugin();
+
+// Also try again when DOM is fully loaded (helps ensure Capacitor is ready)
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!snapshotPluginReady) {
+            console.log("Re-checking Snapshot plugin after DOMContentLoaded...");
+            initializeCapacitorPlugin();
+        }
+    });
 } else {
-    console.log("Running in browser mode (no Capacitor)");
+    // DOM already loaded, try once more after a short delay
+    setTimeout(() => {
+        if (!snapshotPluginReady) {
+            console.log("Re-checking Snapshot plugin after delay...");
+            initializeCapacitorPlugin();
+        }
+    }, 100);
 }
 
 /**
@@ -551,6 +576,12 @@ async function captureClockSnapshot() {
  * Start automatic snapshot updates for widget
  */
 function startAutoSnapshots() {
+    // Ensure plugin is initialized before first snapshot attempt
+    if (!snapshotPluginReady) {
+        console.log("Plugin not ready yet, re-checking before first snapshot...");
+        initializeCapacitorPlugin();
+    }
+    
     // Save initial snapshot after 500ms (when clock is rendered)
     setTimeout(() => {
         if (currentView === 'clock') {
