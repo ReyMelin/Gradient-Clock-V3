@@ -720,10 +720,32 @@ function drawTextureMarkers(ctx, size, textureType) {
         }
     });
 }
-        
-    } catch (err) {
-        console.error('Snapshot capture failed:', err);
+
+/**
+ * Start automatic snapshot updates for widget
+ */
+function startAutoSnapshots() {
+    // Ensure plugin is initialized before first snapshot attempt
+    if (!snapshotPluginReady) {
+        console.log("Plugin not ready yet, re-checking before first snapshot...");
+        initializeCapacitorPlugin();
     }
+    
+    // Save initial snapshot after 1500ms to ensure clock is fully rendered
+    // (includes time for CSS transitions and clock animation frames)
+    setTimeout(() => {
+        if (currentView === 'clock') {
+            console.log('Taking initial snapshot...');
+            captureClockSnapshot();
+        }
+    }, 1500);
+    
+    // Auto-save every 30 seconds to keep widget current
+    setInterval(() => {
+        if (currentView === 'clock') {
+            captureClockSnapshot();
+        }
+    }, 30000);
 }
 
 /**
