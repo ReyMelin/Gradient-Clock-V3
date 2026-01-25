@@ -415,10 +415,67 @@ function showClockView() {
     document.getElementById('landingPage').classList.add('hidden');
     document.getElementById('texturePage').classList.remove('active');
     document.getElementById('clockView').classList.add('active');
+    document.getElementById('snapshotView').classList.remove('active');
     currentView = 'clock';
 
     renderTexture(currentTexture);
+    renderTexture(currentTexture, '#snapshotView .clock-container'); // Also render in snapshot view
     startClock();
+}
+
+function showSnapshotView() {
+    document.getElementById('snapshotView').classList.add('active');
+    currentView = 'snapshot';
+    renderTexture(currentTexture, '#snapshotView .clock-container');
+    updateSnapshotViewClock();
+}
+
+function hideSnapshotView() {
+    document.getElementById('snapshotView').classList.remove('active');
+    currentView = 'clock';
+}
+
+function updateSnapshotViewClock() {
+    const now = new Date();
+    const seconds = now.getSeconds();
+    const minutes = now.getMinutes();
+    const hours = now.getHours() % 12;
+    const milliseconds = now.getMilliseconds();
+
+    const secondsAngle = ((seconds + milliseconds / 1000) / 60) * 360;
+    const minutesAngle = ((minutes + seconds / 60) / 60) * 360;
+    const hoursAngle = ((hours + minutes / 60 + seconds / 3600) / 12) * 360;
+
+    const theme = themes[currentTheme];
+    const secondsRing = document.querySelector('#snapshotView .seconds-ring');
+    const minutesRing = document.querySelector('#snapshotView .minutes-ring');
+    const hoursRing = document.querySelector('#snapshotView .hours-ring');
+
+    if (secondsRing && minutesRing && hoursRing) {
+        secondsRing.style.background = generateGradient(secondsAngle, theme.seconds);
+        minutesRing.style.background = generateGradient(minutesAngle, theme.minutes);
+        hoursRing.style.background = generateGradient(hoursAngle, theme.hours);
+    }
+    
+    // Update time display
+    const timeDisplay = document.querySelector('#snapshotView .time-display');
+    if (timeDisplay) {
+        const displayHours = String(now.getHours()).padStart(2, '0');
+        const displayMinutes = String(minutes).padStart(2, '0');
+        const displaySeconds = String(seconds).padStart(2, '0');
+        
+        if (timeFormat === 'military') {
+            timeDisplay.textContent = `${displayHours}:${displayMinutes}:${displaySeconds}`;
+            timeDisplay.classList.add('show');
+        } else if (timeFormat === 'ampm') {
+            const hour12 = now.getHours() % 12 || 12;
+            const ampm = now.getHours() >= 12 ? 'PM' : 'AM';
+            timeDisplay.textContent = `${String(hour12).padStart(2, '0')}:${displayMinutes}:${displaySeconds} ${ampm}`;
+            timeDisplay.classList.add('show');
+        } else {
+            timeDisplay.classList.remove('show');
+        }
+    }
 }
 
 function backFromClockView() {
@@ -447,20 +504,29 @@ function backFromTexturePage() {
 // Event Listeners
 document.getElementById('backBtn').addEventListener('click', backFromClockView);
 document.getElementById('backFromTextureBtn').addEventListener('click', backFromTexturePage);
-document.getElementById('openWidgetBtn').addEventListener('click', function() {
-    // Open widget functionality - for now, auto-save settings
-    saveConfigToStorage();
+document.getElementById('openWidgetBtn').addEventListener('click', () => {
+    // Show the full-screen snapshot view
+    showSnapshotView();
     
-    // Show visual feedback
-    const btn = this;
-    const originalText = btn.textContent;
-    btn.textContent = '✓ Widget Ready!';
-    btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
-    
+    // Capture snapshot after a delay to ensure rendering
     setTimeout(() => {
-        btn.textContent = originalText;
-        btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-    }, 2000);
+        captureClockSnapshot();
+        
+        // Return to clock view after capture
+        setTimeout(() => {
+            hideSnapshotView();
+            
+            // Open Android widget settings
+            if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+                Capacitor.Plugins.App.openWidgetSettings().then(result => {
+                    console.log('Widget settings opened:', result);
+                }).catch(err => {
+                    console.error('Failed to open widget settings:', err);
+                    window.open('widget://open', '_system');
+                });
+            }
+        }, 500);
+    }, 500);
 });
 
 let resizeTimeout;
@@ -526,38 +592,48 @@ if (document.readyState === 'loading') {
 
 /**
  * Capture and save a snapshot of the clock for the Android widget
+ * Note: html2canvas doesn't support conic-gradient, so we render manually to canvas
  */
 async function captureClockSnapshot() {
     try {
-        const clockContainer = document.querySelector('.clock-container');
+        // Capture from the snapshot view
+        const clockContainer = document.querySelector('#snapshotView .clock-container');
         if (!clockContainer) {
-            console.log('Clock container not found');
-            return;
-        }
-
-        // Check if html2canvas is available
-        if (typeof html2canvas === 'undefined') {
-            console.warn('html2canvas not loaded');
+            console.log('Snapshot view clock container not found');
             return;
         }
 
         console.log('Capturing clock snapshot...');
         
-        // Debug: Check if rings have backgrounds
-        const secondsRing = document.querySelector('.seconds-ring');
-        const minutesRing = document.querySelector('.minutes-ring');
-        const hoursRing = document.querySelector('.hours-ring');
-        if (secondsRing) console.log('Seconds ring background:', secondsRing.style.background.substring(0, 50) + '...');
-        if (minutesRing) console.log('Minutes ring background:', minutesRing.style.background.substring(0, 50) + '...');
-        if (hoursRing) console.log('Hours ring background:', hoursRing.style.background.substring(0, 50) + '...');
-
-        // Use html2canvas to capture only the clock container
-        const canvas = await html2canvas(clockContainer, {
-            backgroundColor: null,
-            scale: 2, // Higher quality for widget
-            logging: false
-        });
-
+        // Create a canvas and draw the clock manually since html2canvas doesn't support conic-gradient
+        const size = 800; // Widget size
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        
+        // Get current time for gradient angles
+        const now = new Date();
+        const seconds = now.getSeconds();
+        const minutes = now.getMinutes();
+        const hours = now.getHours() % 12;
+        const milliseconds = now.getMilliseconds();
+        
+        const secondsAngle = ((seconds + milliseconds / 1000) / 60) * 360;
+        const minutesAngle = ((minutes + seconds / 60) / 60) * 360;
+        const hoursAngle = ((hours + minutes / 60 + seconds / 3600) / 12) * 360;
+        
+        // Draw the three gradient rings
+        const theme = themes[currentTheme];
+        drawConicGradientRing(ctx, size/2, size/2, size*0.47, size*0.5, secondsAngle, theme.seconds);
+        drawConicGradientRing(ctx, size/2, size/2, size*0.38, size*0.42, minutesAngle, theme.minutes);
+        drawConicGradientRing(ctx, size/2, size/2, size*0.28, size*0.32, hoursAngle, theme.hours);
+        
+        // Draw texture markers if enabled
+        if (currentTexture !== 'none') {
+            drawTextureMarkers(ctx, size, currentTexture);
+        }
+        
         const base64Data = canvas.toDataURL('image/png');
         console.log('✓ Canvas captured, data URL length:', base64Data.length);
         
@@ -578,6 +654,72 @@ async function captureClockSnapshot() {
             console.log('- snapshotPluginReady:', snapshotPluginReady);
             console.log('- Snapshot:', Snapshot ? 'exists' : 'null');
         }
+        
+    } catch (err) {
+        console.error('Snapshot capture failed:', err);
+    }
+}
+
+/**
+ * Draw a conic gradient ring manually on canvas
+ */
+function drawConicGradientRing(ctx, cx, cy, innerRadius, outerRadius, startAngle, colorData) {
+    const [hue, sat, ...lightness] = colorData;
+    const segments = 360; // Draw 360 segments for smooth gradient
+    
+    for (let i = 0; i < segments; i++) {
+        const angle = (startAngle + i) % 360;
+        const radians = (angle - 90) * Math.PI / 180;
+        const nextRadians = (angle - 89) * Math.PI / 180;
+        
+        // Determine color based on angle
+        let light;
+        if (angle < 5) light = lightness[1];
+        else if (angle < 15) light = lightness[2];
+        else if (angle < 30) light = lightness[3];
+        else if (angle < 60) light = lightness[4];
+        else if (angle < 120) light = lightness[5];
+        else if (angle < 240) light = lightness[4];
+        else if (angle < 300) light = lightness[3];
+        else if (angle < 345) light = lightness[2];
+        else if (angle < 355) light = lightness[1];
+        else light = lightness[0];
+        
+        ctx.fillStyle = `hsl(${hue}, ${sat}%, ${light}%)`;
+        ctx.beginPath();
+        ctx.arc(cx, cy, outerRadius, radians, nextRadians);
+        ctx.arc(cx, cy, innerRadius, nextRadians, radians, true);
+        ctx.closePath();
+        ctx.fill();
+    }
+}
+
+/**
+ * Draw texture markers on canvas
+ */
+function drawTextureMarkers(ctx, size, textureType) {
+    const radius = size * 0.42;
+    const positions = textureType === 'cardinal' ? [0, 3, 6, 9] : Array.from({length: 12}, (_, i) => i);
+    
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.font = `${size * 0.04}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    positions.forEach(i => {
+        const angle = (i * 30) * Math.PI / 180;
+        const x = size/2 + radius * Math.sin(angle);
+        const y = size/2 - radius * Math.cos(angle);
+        
+        if (textureType === 'roman' || textureType === 'cardinal') {
+            ctx.fillText(romanNumerals[i], x, y);
+        } else {
+            ctx.beginPath();
+            ctx.arc(x, y, size * 0.013, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+    });
+}
         
     } catch (err) {
         console.error('Snapshot capture failed:', err);
