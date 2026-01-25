@@ -505,15 +505,20 @@ function backFromTexturePage() {
 document.getElementById('backBtn').addEventListener('click', backFromClockView);
 document.getElementById('backFromTextureBtn').addEventListener('click', backFromTexturePage);
 document.getElementById('openWidgetBtn').addEventListener('click', () => {
+    console.log('Open Widget button clicked');
+    
     // Show the full-screen snapshot view
     showSnapshotView();
+    console.log('Snapshot view should now be visible');
     
     // Capture snapshot after a delay to ensure rendering
     setTimeout(() => {
+        console.log('Starting snapshot capture...');
         captureClockSnapshot();
         
         // Return to clock view after capture
         setTimeout(() => {
+            console.log('Hiding snapshot view...');
             hideSnapshotView();
             
             // Open Android widget settings
@@ -524,8 +529,10 @@ document.getElementById('openWidgetBtn').addEventListener('click', () => {
                     console.error('Failed to open widget settings:', err);
                     window.open('widget://open', '_system');
                 });
+            } else {
+                console.log('Not on native platform, skipping widget settings');
             }
-        }, 500);
+        }, 1000);
     }, 500);
 });
 

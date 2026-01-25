@@ -505,15 +505,20 @@ function backFromTexturePage() {
 document.getElementById('backBtn').addEventListener('click', backFromClockView);
 document.getElementById('backFromTextureBtn').addEventListener('click', backFromTexturePage);
 document.getElementById('openWidgetBtn').addEventListener('click', () => {
+    console.log('Open Widget button clicked');
+    
     // Show the full-screen snapshot view
     showSnapshotView();
+    console.log('Snapshot view should now be visible');
     
     // Capture snapshot after a delay to ensure rendering
     setTimeout(() => {
+        console.log('Starting snapshot capture...');
         captureClockSnapshot();
         
         // Return to clock view after capture
         setTimeout(() => {
+            console.log('Hiding snapshot view...');
             hideSnapshotView();
             
             // Open Android widget settings
@@ -524,8 +529,10 @@ document.getElementById('openWidgetBtn').addEventListener('click', () => {
                     console.error('Failed to open widget settings:', err);
                     window.open('widget://open', '_system');
                 });
+            } else {
+                console.log('Not on native platform, skipping widget settings');
             }
-        }, 500);
+        }, 1000);
     }, 500);
 });
 
@@ -720,10 +727,32 @@ function drawTextureMarkers(ctx, size, textureType) {
         }
     });
 }
-        
-    } catch (err) {
-        console.error('Snapshot capture failed:', err);
+
+/**
+ * Start automatic snapshot updates for widget
+ */
+function startAutoSnapshots() {
+    // Ensure plugin is initialized before first snapshot attempt
+    if (!snapshotPluginReady) {
+        console.log("Plugin not ready yet, re-checking before first snapshot...");
+        initializeCapacitorPlugin();
     }
+    
+    // Save initial snapshot after 1500ms to ensure clock is fully rendered
+    // (includes time for CSS transitions and clock animation frames)
+    setTimeout(() => {
+        if (currentView === 'clock') {
+            console.log('Taking initial snapshot...');
+            captureClockSnapshot();
+        }
+    }, 1500);
+    
+    // Auto-save every 30 seconds to keep widget current
+    setInterval(() => {
+        if (currentView === 'clock') {
+            captureClockSnapshot();
+        }
+    }, 30000);
 }
 
 /**
