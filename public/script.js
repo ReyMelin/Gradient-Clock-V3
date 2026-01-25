@@ -710,11 +710,6 @@ async function captureManualCanvas() {
     } catch (err) {
         console.error('Manual canvas capture failed:', err);
     }
-        
-    } catch (err) {
-        console.error('Snapshot capture failed:', err);
-    }
-}
 
 /**
  * Draw a conic gradient ring manually on canvas
