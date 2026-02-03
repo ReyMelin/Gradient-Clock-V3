@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@capacitor/android": "^5.7.0",
-    "@capacitor/core": "^5.7.0"
+    "@capacitor/core": "^5.7.0",
+    "android": "^0.0.8"
   }
 }
