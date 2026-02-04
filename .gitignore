@@ -40,3 +40,5 @@ android/app/src/main/assets/capacitor.plugins.json
 .DS_Store
 Thumbs.db
 
+# Capacitor generated Android web assets (do not track)
+android/app/src/main/assets/public/
