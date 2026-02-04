@@ -668,9 +668,11 @@ async function captureManualCanvas() {
         canvas.height = size;
         const ctx = canvas.getContext('2d');
 
+        // Black background
         ctx.fillStyle = '#000000';
         ctx.fillRect(0, 0, size, size);
 
+        // Current time angles
         const now = new Date();
         const seconds = now.getSeconds();
         const minutes = now.getMinutes();
@@ -681,11 +683,13 @@ async function captureManualCanvas() {
         const minutesAngle = ((minutes + seconds / 60) / 60) * 360;
         const hoursAngle = ((hours + minutes / 60 + seconds / 3600) / 12) * 360;
 
+        // Rings
         const theme = themes[currentTheme];
         drawConicGradientRing(ctx, size / 2, size / 2, size * 0.47, size * 0.50, secondsAngle, theme.seconds);
         drawConicGradientRing(ctx, size / 2, size / 2, size * 0.38, size * 0.42, minutesAngle, theme.minutes);
         drawConicGradientRing(ctx, size / 2, size / 2, size * 0.28, size * 0.32, hoursAngle, theme.hours);
 
+        // Texture
         if (currentTexture !== 'none') {
             drawTextureMarkers(ctx, size, currentTexture);
         }
@@ -693,6 +697,7 @@ async function captureManualCanvas() {
         const base64Data = canvas.toDataURL('image/png');
         console.log('✓ Manual canvas captured, data URL length:', base64Data.length);
 
+        // Save (native)
         if (snapshotPluginReady && Snapshot) {
             try {
                 const result = await Snapshot.savePngBase64({ data: base64Data });
@@ -703,11 +708,11 @@ async function captureManualCanvas() {
         } else {
             console.log('Manual snapshot captured (browser mode - not saved)');
         }
+
     } catch (err) {
         console.error('Manual canvas capture failed:', err);
     }
 }
-
 
 
 /**
