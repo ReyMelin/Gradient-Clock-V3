@@ -661,44 +661,38 @@ async function captureClockSnapshot() {
 async function captureManualCanvas() {
     try {
         console.log('Using manual canvas rendering...');
-        
-        // Create a canvas and draw the clock manually
+
         const size = 800;
         const canvas = document.createElement('canvas');
         canvas.width = size;
         canvas.height = size;
         const ctx = canvas.getContext('2d');
-        
-        // Black background
+
         ctx.fillStyle = '#000000';
         ctx.fillRect(0, 0, size, size);
-        
-        // Get current time for gradient angles
+
         const now = new Date();
         const seconds = now.getSeconds();
         const minutes = now.getMinutes();
         const hours = now.getHours() % 12;
         const milliseconds = now.getMilliseconds();
-        
+
         const secondsAngle = ((seconds + milliseconds / 1000) / 60) * 360;
         const minutesAngle = ((minutes + seconds / 60) / 60) * 360;
         const hoursAngle = ((hours + minutes / 60 + seconds / 3600) / 12) * 360;
-        
-        // Draw the three gradient rings
+
         const theme = themes[currentTheme];
-        drawConicGradientRing(ctx, size/2, size/2, size*0.47, size*0.5, secondsAngle, theme.seconds);
-        drawConicGradientRing(ctx, size/2, size/2, size*0.38, size*0.42, minutesAngle, theme.minutes);
-        drawConicGradientRing(ctx, size/2, size/2, size*0.28, size*0.32, hoursAngle, theme.hours);
-        
-        // Draw texture markers if enabled
+        drawConicGradientRing(ctx, size / 2, size / 2, size * 0.47, size * 0.50, secondsAngle, theme.seconds);
+        drawConicGradientRing(ctx, size / 2, size / 2, size * 0.38, size * 0.42, minutesAngle, theme.minutes);
+        drawConicGradientRing(ctx, size / 2, size / 2, size * 0.28, size * 0.32, hoursAngle, theme.hours);
+
         if (currentTexture !== 'none') {
             drawTextureMarkers(ctx, size, currentTexture);
         }
-        
+
         const base64Data = canvas.toDataURL('image/png');
         console.log('✓ Manual canvas captured, data URL length:', base64Data.length);
-        
-        // Save to device
+
         if (snapshotPluginReady && Snapshot) {
             try {
                 const result = await Snapshot.savePngBase64({ data: base64Data });
@@ -706,15 +700,15 @@ async function captureManualCanvas() {
             } catch (nativeErr) {
                 console.error('✗ Native save failed:', nativeErr);
             }
+        } else {
+            console.log('Manual snapshot captured (browser mode - not saved)');
         }
     } catch (err) {
         console.error('Manual canvas capture failed:', err);
     }
-        
-    } catch (err) {
-        console.error('Snapshot capture failed:', err);
-    }
 }
+
+
 
 /**
  * Draw a conic gradient ring manually on canvas
@@ -775,33 +769,6 @@ function drawTextureMarkers(ctx, size, textureType) {
             ctx.fill();
         }
     });
-}
-
-/**
- * Start automatic snapshot updates for widget
- */
-function startAutoSnapshots() {
-    // Ensure plugin is initialized before first snapshot attempt
-    if (!snapshotPluginReady) {
-        console.log("Plugin not ready yet, re-checking before first snapshot...");
-        initializeCapacitorPlugin();
-    }
-    
-    // Save initial snapshot after 1500ms to ensure clock is fully rendered
-    // (includes time for CSS transitions and clock animation frames)
-    setTimeout(() => {
-        if (currentView === 'clock') {
-            console.log('Taking initial snapshot...');
-            captureClockSnapshot();
-        }
-    }, 1500);
-    
-    // Auto-save every 30 seconds to keep widget current
-    setInterval(() => {
-        if (currentView === 'clock') {
-            captureClockSnapshot();
-        }
-    }, 30000);
 }
 
 /**
