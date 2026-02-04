@@ -1,47 +1,42 @@
-﻿# --- IDE (ignore everywhere) ---
-**/.idea/**
-**/.vscode/**
-**/.vs/**
-**/*.iml
-
-# --- Node ---
-**/node_modules/**
-
-
-# --- IDE (Android Studio / IntelliJ) ---
+﻿# ===============================
+# IDEs / Editors
+# ===============================
 .idea/
-android/.idea/
-*.iml
-
-# --- VS / VSCode ---
 .vs/
 .vscode/
-
-# --- Node ---
-node_modules/
-
-.idea/
-.vs/
 *.iml
+
+# ===============================
+# Node / Web
+# ===============================
 node_modules/
-android/.idea/
-android/**/build/
+npm-debug.log*
+yarn-error.log*
+
+# ===============================
+# Build outputs
+# ===============================
+www/
+dist/
+
+# ===============================
+# Android / Gradle
+# ===============================
 android/.gradle/
+android/**/build/
 android/local.properties
-package-lock.json
+android/.idea/
 
-# IDE
-.idea/
-.vs/
-*.iml
+# ===============================
+# Capacitor generated (copied web assets)
+# ===============================
+android/app/src/main/assets/public
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
 
+# ===============================
 # System files
+# ===============================
 .DS_Store
 Thumbs.db
 
-# Logs
-*.log
-
-# Build outputs
-www/
-dist/
