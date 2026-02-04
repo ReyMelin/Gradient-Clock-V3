@@ -815,3 +815,8 @@ if (hadSavedConfig) {
 
 // Start automatic snapshots for widget
 startAutoSnapshots();
+
+console.log(
+  "Capacitor.Plugins keys:",
+  Object.keys(window.Capacitor?.Plugins || {})
+);
