@@ -7,7 +7,6 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Register the Snapshot plugin (auto-registered via @CapacitorPlugin annotation)
         registerPlugin(ClockSnapshotPlugin.class);
     }
 }
