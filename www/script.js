@@ -1,3 +1,5 @@
+console.log("✅ script.js loaded OK");
+
 const romanNumerals = ['XII', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'];
 
 const themes = {
