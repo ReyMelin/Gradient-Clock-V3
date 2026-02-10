@@ -1,6 +1,11 @@
 package com.reymelin.gradientclock;
 
 import android.content.Context;
+import android.content.Intent;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
+import android.os.Build;
+import android.provider.Settings;
 import android.util.Base64;
 import android.util.Log;
 
@@ -9,6 +14,7 @@ import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
+import com.reymelin.gradientclock.widget.GradientClockWidgetProvider;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -60,6 +66,33 @@ public class ClockSnapshotPlugin extends Plugin {
         } catch (Exception e) {
             Log.e(TAG, "CRITICAL: Failed saving snapshot", e);
             call.reject("Failed saving snapshot: " + e.getMessage());
+        }
+    }
+
+    @PluginMethod
+    public void openWidgetPicker(PluginCall call) {
+        try {
+            Context ctx = getContext();
+            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(ctx);
+            ComponentName widgetComponent = new ComponentName(ctx, GradientClockWidgetProvider.class);
+
+            boolean launched = false;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                launched = appWidgetManager.requestPinAppWidget(widgetComponent, null, null);
+            }
+
+            if (!launched) {
+                Intent intent = new Intent(Settings.ACTION_HOME_SETTINGS);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                ctx.startActivity(intent);
+            }
+
+            JSObject ret = new JSObject();
+            ret.put("success", true);
+            ret.put("pinned", launched);
+            call.resolve(ret);
+        } catch (Exception e) {
+            call.reject("Failed to open widget picker: " + e.getMessage());
         }
     }
 }
