@@ -523,16 +523,19 @@ document.getElementById('openWidgetBtn').addEventListener('click', () => {
             console.log('Hiding snapshot view...');
             hideSnapshotView();
             
-            // Open Android widget settings
+            // Open Android widget picker
             if (window.Capacitor && window.Capacitor.isNativePlatform()) {
-                Capacitor.Plugins.App.openWidgetSettings().then(result => {
-                    console.log('Widget settings opened:', result);
-                }).catch(err => {
-                    console.error('Failed to open widget settings:', err);
-                    window.open('widget://open', '_system');
-                });
+                if (snapshotPluginReady && Snapshot && Snapshot.openWidgetPicker) {
+                    Snapshot.openWidgetPicker().then(result => {
+                        console.log('Widget picker request sent:', result);
+                    }).catch(err => {
+                        console.error('Failed to open widget picker:', err);
+                    });
+                } else {
+                    console.warn('Snapshot plugin is not ready, cannot open widget picker yet');
+                }
             } else {
-                console.log('Not on native platform, skipping widget settings');
+                console.log('Not on native platform, skipping widget picker');
             }
         }, 2000); // Wait 2 seconds so user can see the snapshot view
     }, 1000); // Wait 1 second for snapshot view to fully render
@@ -815,3 +818,8 @@ if (hadSavedConfig) {
 
 // Start automatic snapshots for widget
 startAutoSnapshots();
+
+console.log(
+  "Capacitor.Plugins keys:",
+  Object.keys(window.Capacitor?.Plugins || {})
+);
